@@ -1,4 +1,4 @@
-IMAGES=waku1.png waku2.png waku3.png waku4.png
+IMAGES=waku1.png waku2.png waku3.png waku4.png waku_v2.png
 OBJS=$(IMAGES:.png=.o)
 TARGET=libimage.a
 HEADER=image.h
