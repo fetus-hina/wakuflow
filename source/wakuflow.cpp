@@ -77,6 +77,12 @@ namespace {
     bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &/*options*/) {
         if(command == "waku1") {
             return waku::waku1(image);
+        } else if(command == "waku2") {
+            return waku::waku2(image);
+        } else if(command == "waku3") {
+            return waku::waku3(image);
+        } else if(command == "waku4") {
+            return waku::waku4(image);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;

@@ -17,3 +17,15 @@
     【初代？枠】
         command: waku1
         option: なし
+
+    【初代？枠 ∞なし】
+        command: waku2
+        option: なし
+
+    【初代？枠 「枠」】
+        command: waku3
+        option: なし
+
+    【初代？枠 ∞なし 「枠」】
+        command: waku4
+        option: なし

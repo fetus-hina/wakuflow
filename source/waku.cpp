@@ -36,4 +36,22 @@ namespace waku {
         waku.convert_to_true_color();
         return proc(icon, waku);
     }
+
+    bool waku2(gd &icon) {
+        gd waku(_binary_waku2_png_start, _binary_waku2_png_end);
+        waku.convert_to_true_color();
+        return proc(icon, waku);
+    }
+
+    bool waku3(gd &icon) {
+        gd waku(_binary_waku3_png_start, _binary_waku3_png_end);
+        waku.convert_to_true_color();
+        return proc(icon, waku);
+    }
+
+    bool waku4(gd &icon) {
+        gd waku(_binary_waku4_png_start, _binary_waku4_png_end);
+        waku.convert_to_true_color();
+        return proc(icon, waku);
+    }
 }

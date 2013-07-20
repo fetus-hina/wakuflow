@@ -1,4 +1,4 @@
-IMAGES=waku1.png
+IMAGES=waku1.png waku2.png waku3.png waku4.png
 OBJS=$(IMAGES:.png=.o)
 TARGET=libimage.a
 HEADER=image.h
@@ -26,7 +26,7 @@ $(HEADER): $(OBJS)
 	echo '#endif' >> $(HEADER)
 
 $(TARGET): $(OBJS)
-	ar rsv $@ $<
+	ar rsv $@ $^
 
 clean:
 	$(RM) $(OBJS) $(HEADER) $(TARGET)
