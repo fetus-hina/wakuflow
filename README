@@ -1,1 +1,19 @@
-$ wakuflow < infile.{png,jpg,gif} > outfile.png
+1. wakuflow プログラムを起動
+
+    $ wakuflow --input=/path/to/infile.{png,jpg,gif} --output=/path/to/outfile.png
+
+2. wakuflow は標準入力から「わーくフロー(参考: https://twitter.com/fetus_hina/status/240793399928700928 )」を受け付けるので次の書式で入力
+
+    <command> <option> <option> <option...>
+
+3. わーくフローの指定が終わったら標準入力を閉じる(たとえば Ctrl+D)
+
+4. 出力ファイルをどうにかする
+
+    ※ちなみに、input はワークフロー入力の関係で標準入力使えませんが、 output には使えます。
+
+<command> & <option>
+
+    【初代？枠】
+        command: waku1
+        option: なし

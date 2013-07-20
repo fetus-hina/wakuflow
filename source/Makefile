@@ -1,4 +1,4 @@
-SRCS=wakuflow.cpp gd.cpp
+SRCS=wakuflow.cpp waku.cpp gd.cpp
 OBJS=$(SRCS:.cpp=.o)
 TARGET=wakuflow
 
@@ -12,7 +12,7 @@ all: $(TARGET)
 		-o $@ $<
 	
 $(TARGET): $(OBJS)
-	g++ -o $(TARGET) $(OBJS) ../image/libimage.a -lgd
+	g++ -o $(TARGET) $(OBJS) ../image/libimage.a -lgd -lboost_program_options
 
 clean:
 	$(RM) $(OBJS) $(TARGET)
