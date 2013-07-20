@@ -1,0 +1,1 @@
+$ wakuflow < infile.{png,jpg,gif} > outfile.png
