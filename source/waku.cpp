@@ -20,7 +20,7 @@ namespace waku {
             waku.save_alpha(false);
 
             gd built(waku.width(), waku.height());
-            built.fill(0, 0, DRAW_AREA_BGCOLOR);
+            built.fill(0, 0, DRAW_AREA_BGCOLOR); //TODO: 必要な箇所だけ塗りつぶす
             built.alpha_blending(true);
             built.save_alpha(false);
             built.copy(icon, DRAW_AREA_X, DRAW_AREA_Y, 0, 0, icon.width(), icon.height());
@@ -33,25 +33,21 @@ namespace waku {
 
     bool waku1(gd &icon) {
         gd waku(_binary_waku1_png_start, _binary_waku1_png_end);
-        waku.convert_to_true_color();
         return proc(icon, waku);
     }
 
     bool waku2(gd &icon) {
         gd waku(_binary_waku2_png_start, _binary_waku2_png_end);
-        waku.convert_to_true_color();
         return proc(icon, waku);
     }
 
     bool waku3(gd &icon) {
         gd waku(_binary_waku3_png_start, _binary_waku3_png_end);
-        waku.convert_to_true_color();
         return proc(icon, waku);
     }
 
     bool waku4(gd &icon) {
         gd waku(_binary_waku4_png_start, _binary_waku4_png_end);
-        waku.convert_to_true_color();
         return proc(icon, waku);
     }
 }
