@@ -49,3 +49,11 @@
     【八色化】
         command: 8colors
         option: なし
+
+    【ネガ】
+        command: nagate
+        option: なし
+
+    【モザイク】
+        command: pixelate
+        option1: モザイクサイズ(int)

@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
 #include <errno.h>
 #include "gd.h"
 #include "waku.h"
@@ -76,7 +77,7 @@ namespace {
     }
 
 
-    bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &/*options*/) {
+    bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &options) {
         if(command == "waku1") {
             return waku::waku1(image);
         } else if(command == "waku2") {
@@ -96,6 +97,20 @@ namespace {
             return manip::grayscale(image) && manip::binarize(image, true);
         } else if(command == "8colors") {
             return manip::binarize(image, false);
+        } else if(command == "negate") {
+            return manip::negate(image);
+        } else if(command == "pixelate") {
+            if(options.size() < 1) {
+                std::cerr << "pixleate コマンドにはサイズの指定が必要です" << std::endl;
+                return false;
+            }
+            try {
+                const int size = boost::lexical_cast<int>(options[0]);
+                return manip::pixelate(image, size);
+            } catch(boost::bad_lexical_cast) {
+                std::cerr << "pixelate コマンドの引数は整数を設定してください" << std::endl;
+                return false;
+            }
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
@@ -154,6 +169,7 @@ int main(int argc, char *argv[]) {
         }
     }
     
+    current_image.save_alpha(true);
     current_image.save_png(binary, 9);
     if(!save_output_file(opt["output"].as<std::string>(), binary)) {
         std::cerr << "指定された出力ファイルへ書き込めません" << std::endl;

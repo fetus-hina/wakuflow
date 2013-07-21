@@ -1,4 +1,5 @@
 #include "manip.h"
+#include <iostream>
 #include <cmath>
 #include "gd.h"
 #include "../image/image.h"
@@ -149,6 +150,76 @@ namespace manip {
                 img.pixel_fast(x, y, a | (r << 16) | (g << 8) | b);
             }
         }
+        return true;
+    }
+
+    bool negate(gd &img) {
+        img.convert_to_true_color();
+        img.alpha_blending(false);
+        const int width = img.width();
+        const int height = img.height();
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const gd::color color = img.pixel_fast(x, y);
+                const int a = (color & 0x7f000000);
+                const int r = 255 - ((color & 0x00ff0000) >> 16);
+                const int g = 255 - ((color & 0x0000ff00) >> 8);
+                const int b = 255 - ((color & 0x000000ff));
+                img.pixel_fast(x, y, a | (r << 16) | (g << 8) | b);
+            }
+        }
+        return true;
+    }
+
+    bool pixelate(gd &img, int size) {
+        if(size < 1) {
+            std::cerr << "モザイクのサイズは 1 以上である必要があります" << std::endl;
+            return false;
+        }
+        img.convert_to_true_color();
+        const int width = img.width();
+        const int height = img.height();
+        const int blocks_x = (width + size - 1) / size;
+        const int blocks_y = (height + size - 1) / size;
+        gd out(width, height);
+        out.alpha_blending(false);
+        for(int block_y = 0; block_y < blocks_y; ++block_y) {
+            const int min_y = block_y * size;
+            const int max_y = std::min((block_y + 1) * size, height);
+            for(int block_x = 0; block_x < blocks_x; ++block_x) {
+                const int min_x = block_x * size;
+                const int max_x = std::min((block_x + 1) * size, width);
+                int total_r = 0, total_g = 0, total_b = 0, total_a = 0;
+                int pixel_count = 0;
+                for(int y = min_y; y < max_y; ++y) {
+                    for(int x = min_x; x < max_x; ++x) {
+                        const gd::color color = img.pixel_fast(x, y);
+                        const int a = (color & 0x7f000000) >> 24;
+                        if(a == 0x7f) {
+                            // 完全透明
+                            continue;
+                        }
+                        const int r = (color & 0xff0000) >> 16;
+                        const int g = (color & 0x00ff00) >> 8;
+                        const int b = (color & 0x0000ff);
+                        total_r += r;
+                        total_g += g;
+                        total_b += b;
+                        total_a += a;
+                        ++pixel_count;
+                    }
+                }
+                const int fill_color =
+                    (pixel_count < 1)
+                        ? 0x7fffffff
+                        : ((static_cast<int>((double)total_a / (double)pixel_count + 0.5) << 24) |
+                           (static_cast<int>((double)total_r / (double)pixel_count + 0.5) << 16) |
+                           (static_cast<int>((double)total_g / (double)pixel_count + 0.5) <<  8) |
+                           (static_cast<int>((double)total_b / (double)pixel_count + 0.5)));
+                out.fill_rect(min_x, min_y, max_x, max_y, fill_color);
+            }
+        }
+        img.swap(out);
         return true;
     }
 }
