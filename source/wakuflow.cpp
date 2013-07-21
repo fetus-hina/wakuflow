@@ -9,6 +9,7 @@
 #include "gd.h"
 #include "waku.h"
 #include "waku_v2.h"
+#include "manip.h"
 
 namespace po = ::boost::program_options;
 
@@ -75,7 +76,7 @@ namespace {
     }
 
 
-    bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &/*options*/) {
+    bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &options) {
         if(command == "waku1") {
             return waku::waku1(image);
         } else if(command == "waku2") {
@@ -85,7 +86,12 @@ namespace {
         } else if(command == "waku4") {
             return waku::waku4(image);
         } else if(command == "waku_v2") {
+            //TODO: screen_name
             return waku_v2::waku_v2(image);
+        } else if(command == "grayscale") {
+            using namespace manip;
+            const GRAYSCALE_METHOD me = options.size() > 0 && options[0] == "avg" ? GRAY_AVERAGE : GRAY_NTSC;
+            return grayscale(image, me);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;

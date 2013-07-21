@@ -132,6 +132,11 @@ void gd::resize_fit(int target_w, int target_h) {
     assert(height() == target_h);
 }
 
+void gd::pixel(int x, int y, color c) {
+    VALIDATE_IMAGE();
+    ::gdImageSetPixel(m_image, x, y, c);
+}
+
 gd::color gd::color_allocate(uint8_t r, uint8_t g, uint8_t b) {
     VALIDATE_IMAGE();
     return ::gdImageColorAllocate(m_image, r, g, b);
@@ -169,6 +174,13 @@ bool gd::is_true_color() const {
 
 bool gd::is_palette() const {
     return !is_true_color();
+}
+
+gd::color gd::pixel(int x, int y) const {
+    VALIDATE_IMAGE();
+    return is_true_color()
+        ? ::gdImageGetTrueColorPixel(m_image, x, y)
+        : ::gdImageGetPixel(m_image, x, y);
 }
 
 void gd::save_png(std::vector<char> &out, int level) const {

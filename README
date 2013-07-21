@@ -10,7 +10,7 @@
 
 4. 出力ファイルをどうにかする
 
-    ※ちなみに、input はワークフロー入力の関係で標準入力使えませんが、 output には使えます。
+    ※ちなみに、input はワークフロー入力の関係で標準入力使えませんが、 output を標準出力にはできます
 
 <command> & <option>
 
@@ -33,3 +33,7 @@
     【新枠】
         command: waku_v2
         option1: screen_name    (→に重ねる文字: 未実装)
+
+    【グレースケール】
+        command: grayscale
+        option1: avg | ntsc [default: ntsc] (計算方法)

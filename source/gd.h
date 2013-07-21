@@ -36,6 +36,7 @@ public:
     void fill(int x, int y, color c);
     void fill_rect(int x1, int y1, int x2, int y2, color c);
     void resize_fit(int w, int h);
+    void pixel(int x, int y, color c);
 
     color color_allocate(uint8_t r, uint8_t g, uint8_t b);
     color color_allocate(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
@@ -48,6 +49,7 @@ public:
     int height() const;
     bool is_true_color() const;
     bool is_palette() const;
+    color pixel(int x, int y) const;
 
     void save_png(std::vector<char> &out, int level = -1) const;
 
