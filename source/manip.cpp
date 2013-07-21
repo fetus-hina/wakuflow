@@ -33,7 +33,7 @@ namespace manip {
             const int height = img.height();
             for(int y = 0; y < height; ++y) {
                 for(int x = 0; x < width; ++x) {
-                    img.pixel(x, y, method(img.pixel(x, y)));
+                    img.pixel_fast(x, y, method(img.pixel_fast(x, y)));
                 }
             }
             return true;

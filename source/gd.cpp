@@ -137,6 +137,27 @@ void gd::pixel(int x, int y, color c) {
     ::gdImageSetPixel(m_image, x, y, c);
 }
 
+gd::color gd::pixel(int x, int y) const {
+    VALIDATE_IMAGE();
+    return is_true_color()
+        ? ::gdImageGetTrueColorPixel(m_image, x, y)
+        : ::gdImageGetPixel(m_image, x, y);
+}
+
+void gd::pixel_fast(int x, int y, color c) {
+    if(gdImageTrueColor(m_image) == 0) {
+        gdImagePalettePixel(m_image, x, y) = static_cast<uint8_t>(c);
+    } else {
+        gdImageTrueColorPixel(m_image, x, y) = c;
+    }
+}
+
+gd::color gd::pixel_fast(int x, int y) const {
+    return (gdImageTrueColor(m_image) == 0)
+        ? gdImagePalettePixel(m_image, x, y)
+        : gdImageTrueColorPixel(m_image, x, y);
+}
+
 gd::color gd::color_allocate(uint8_t r, uint8_t g, uint8_t b) {
     VALIDATE_IMAGE();
     return ::gdImageColorAllocate(m_image, r, g, b);
@@ -174,13 +195,6 @@ bool gd::is_true_color() const {
 
 bool gd::is_palette() const {
     return !is_true_color();
-}
-
-gd::color gd::pixel(int x, int y) const {
-    VALIDATE_IMAGE();
-    return is_true_color()
-        ? ::gdImageGetTrueColorPixel(m_image, x, y)
-        : ::gdImageGetPixel(m_image, x, y);
 }
 
 void gd::save_png(std::vector<char> &out, int level) const {
