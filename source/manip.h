@@ -4,5 +4,6 @@
 class gd;
 namespace manip {
     bool grayscale(gd &);
+    bool colorize(gd &, int r, int g, int b, int a);
 }
 #endif

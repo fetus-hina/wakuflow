@@ -36,4 +36,8 @@
 
     【グレースケール】
         command: grayscale
-        option1: avg | ntsc [default: ntsc] (計算方法)
+        option: なし
+
+    【セピア】
+        command: sepia
+        option: なし

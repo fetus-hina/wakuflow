@@ -90,6 +90,8 @@ namespace {
             return waku_v2::waku_v2(image);
         } else if(command == "grayscale") {
             return manip::grayscale(image);
+        } else if(command == "sepia") {
+            return manip::grayscale(image) && manip::colorize(image, 100, 50, 0, 0);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
