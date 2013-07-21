@@ -3,8 +3,6 @@
 #include "gd.h"
 #include "../image/image.h"
 
-#include <iostream>
-
 namespace manip {
     namespace {
         // 大津の手法による閾値の計算
