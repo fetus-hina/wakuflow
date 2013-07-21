@@ -34,6 +34,7 @@ public:
     void copy_merge(const gd &src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct);
     void copy_resize(const gd &src, int dx, int dy, int sx, int sy, int dw, int dh, int sw, int sh);
     void fill(int x, int y, color c);
+    void fill_rect(int x1, int y1, int x2, int y2, color c);
     void resize_fit(int w, int h);
 
     color color_allocate(uint8_t r, uint8_t g, uint8_t b);
@@ -41,6 +42,7 @@ public:
 
     void alpha_blending(bool mode);
     void save_alpha(bool mode);
+    void alpha(bool blend, bool save);
 
     int width() const;
     int height() const;
@@ -56,5 +58,10 @@ private:
 
     gdImage *m_image;
 };
+
+inline void gd::alpha(bool blend, bool save) {
+    alpha_blending(blend);
+    save_alpha(save);
+}
 
 #endif

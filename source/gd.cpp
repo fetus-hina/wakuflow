@@ -95,6 +95,11 @@ void gd::fill(int x, int y, color c) {
     ::gdImageFill(m_image, x, y, c);
 }
 
+void gd::fill_rect(int x1, int y1, int x2, int y2, color c) {
+    VALIDATE_IMAGE();
+    ::gdImageFilledRectangle(m_image, x1, y1, x2, y2, c);
+}
+
 void gd::resize_fit(int target_w, int target_h) {
     VALIDATE_IMAGE();
     assert(target_w > 0);

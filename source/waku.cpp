@@ -11,20 +11,22 @@ namespace waku {
 
     namespace {
         bool proc(gd &icon, gd &waku) {
+            const int width = waku.width();
+            const int height = waku.height();
+
+            icon.alpha(true, true);
             icon.resize_fit(DRAW_AREA_W, DRAW_AREA_H);
-            icon.alpha_blending(true);
-            icon.save_alpha(false);
 
             waku.convert_to_true_color();
-            waku.alpha_blending(true);
-            waku.save_alpha(false);
+            waku.alpha(true, true);
 
-            gd built(waku.width(), waku.height());
-            built.fill(0, 0, DRAW_AREA_BGCOLOR); //TODO: 必要な箇所だけ塗りつぶす
+            gd built(width, height);
+            built.alpha(false, true);
+            built.fill_rect(0, 0, width - 1, height - 1, 0x7fffffff);
+            built.fill_rect(DRAW_AREA_X, DRAW_AREA_Y, DRAW_AREA_X + DRAW_AREA_W, DRAW_AREA_Y + DRAW_AREA_H, DRAW_AREA_BGCOLOR);
             built.alpha_blending(true);
-            built.save_alpha(false);
-            built.copy(icon, DRAW_AREA_X, DRAW_AREA_Y, 0, 0, icon.width(), icon.height());
-            built.copy(waku, 0, 0, 0, 0, waku.width(), waku.height());
+            built.copy(icon, DRAW_AREA_X, DRAW_AREA_Y, 0, 0, DRAW_AREA_W, DRAW_AREA_H);
+            built.copy(waku, 0, 0, 0, 0, width, height);
 
             icon.swap(built);
             return true;
