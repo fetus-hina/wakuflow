@@ -8,5 +8,6 @@ namespace manip {
     bool binarize(gd &, bool is_grayscaled);
     bool negate(gd &);
     bool pixelate(gd &, int);
+    bool emboss(gd &);
 }
 #endif

@@ -111,6 +111,8 @@ namespace {
                 std::cerr << "pixelate コマンドの引数は整数を設定してください" << std::endl;
                 return false;
             }
+        } else if(command == "emboss") {
+            return manip::emboss(image);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;

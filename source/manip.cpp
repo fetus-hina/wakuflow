@@ -49,6 +49,83 @@ namespace manip {
             }
             return max_no;
         }
+
+        // 3x3 微分オペレータを適用する
+        bool apply_operator_3x3(gd &img, const double op[3][3], double filter_div, double offset) {
+            const int width = img.width();
+            const int height = img.height();
+            gd dst(width, height);
+            dst.alpha_blending(false);
+
+            for(int y = 0; y < height; ++y) {
+                for(int x = 0; x < width; ++x) {
+                    double sum_r = 0., sum_g = 0., sum_b = 0., sum_a = 0.;
+                    int pixel_count = 0;
+                    for(int j = -1; j <= 1; ++j) {
+                        const int ref_y = std::min(std::max(0, y + j), height - 1);
+                        for(int i = -1; i <= 1; ++i) {
+                            const int ref_x = std::min(std::max(0, x + i), width - 1);
+                            const double ref_op = op[i + 1][j + 1];
+                            const gd::color color = img.pixel_fast(ref_x, ref_y);
+                            const int a = (color & 0x7f000000) >> 24;
+                            if(a == 0x7f) {
+                                continue;
+                            }
+                            if(std::abs(ref_op) > 0.0001) {
+                                const int r = (color & 0xff0000) >> 16;
+                                const int g = (color & 0x00ff00) >> 8;
+                                const int b = (color & 0x0000ff);
+                                sum_r += r * ref_op;
+                                sum_g += g * ref_op;
+                                sum_b += b * ref_op;
+                                sum_a += a * ref_op;
+                            }
+                            ++pixel_count;
+                        }
+                    }
+
+                    if(pixel_count > 0) {
+                        const int r = std::max(0, std::min(255, static_cast<int>(sum_r / filter_div + offset + 0.5)));
+                        const int g = std::max(0, std::min(255, static_cast<int>(sum_g / filter_div + offset + 0.5)));
+                        const int b = std::max(0, std::min(255, static_cast<int>(sum_b / filter_div + offset + 0.5)));
+                        const int a = std::max(0, std::min(127, static_cast<int>(sum_a + 0.5)));
+                        dst.pixel_fast(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+                    } else {
+                        dst.pixel_fast(x, y, 0x7fffffff);
+                    }
+                }
+            }
+            img.swap(dst);
+            return true;
+        }
+    }
+
+    bool fill_background(gd &img, gd::color bg) {
+        const int bg_r = (bg & 0xff0000) >> 16;
+        const int bg_g = (bg & 0x00ff00) >>  8;
+        const int bg_b = (bg & 0x0000ff);
+        img.convert_to_true_color();
+        img.alpha_blending(false);
+        const int width = img.width();
+        const int height = img.height();
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const gd::color color = img.pixel_fast(x, y);
+                const int a = (color & 0x7f000000) >> 24;
+                if(a == 0) {
+                    continue;
+                }
+                const double alpha = static_cast<double>(127 - a) / 127.0;
+                const int org_r = (color & 0xff0000) >> 16;
+                const int org_g = (color & 0x00ff00) >>  8;
+                const int org_b = (color & 0x0000ff);
+                const int r = static_cast<int>(org_r * alpha + bg_r * (1.0 - alpha) + 0.5);
+                const int g = static_cast<int>(org_g * alpha + bg_g * (1.0 - alpha) + 0.5);
+                const int b = static_cast<int>(org_b * alpha + bg_b * (1.0 - alpha) + 0.5);
+                img.pixel_fast(x, y, (r << 16) | (g << 8) | b);
+            }
+        }
+        return true;
     }
 
     bool grayscale(gd &img) {
@@ -221,5 +298,14 @@ namespace manip {
         }
         img.swap(out);
         return true;
+    }
+
+    bool emboss(gd &img) {
+        const double filter[3][3] = {
+            { 1.5, 0.0, 0.0},
+            { 0.0, 0.0, 0.0},
+            { 0.0, 0.0,-1.5}
+        };
+        return fill_background(img, 0xffffff) && grayscale(img) && apply_operator_3x3(img, filter, 1, 127);
     }
 }
