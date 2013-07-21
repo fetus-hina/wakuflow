@@ -131,6 +131,11 @@ namespace manip {
             }
         }
 
+        // 完全に透明な画像だったわ
+        if(pixel_count < 1) {
+            return true;
+        }
+
         // 大津の手法により閾値を計算
         const int otsu_threshold_r = otsu_threshold((double)total_r / (double)pixel_count, hist_r);
         const int otsu_threshold_g = is_grayscaled ? otsu_threshold_r : otsu_threshold((double)total_g / (double)pixel_count, hist_g);
