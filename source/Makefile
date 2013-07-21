@@ -1,4 +1,4 @@
-SRCS=wakuflow.cpp waku.cpp gd.cpp
+SRCS=wakuflow.cpp waku.cpp waku_v2.cpp gd.cpp
 OBJS=$(SRCS:.cpp=.o)
 TARGET=wakuflow
 

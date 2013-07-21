@@ -8,6 +8,7 @@
 #include <errno.h>
 #include "gd.h"
 #include "waku.h"
+#include "waku_v2.h"
 
 namespace po = ::boost::program_options;
 
@@ -83,6 +84,8 @@ namespace {
             return waku::waku3(image);
         } else if(command == "waku4") {
             return waku::waku4(image);
+        } else if(command == "waku_v2") {
+            return waku_v2::waku_v2(image);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
