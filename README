@@ -1,6 +1,8 @@
 1. wakuflow プログラムを起動
 
-    $ wakuflow --input=/path/to/infile.{png,jpg,gif} --output=/path/to/outfile.png
+    $ wakuflow --input=/path/to/infile.{png,jpg,gif} --output=/path/to/outfile.png --font=/path/to/font.ttf
+
+    ※waku_v2 を使用する場合は --font オプションが必須。ttf/otf ファイルなら大体 OK だけど、MyriadPro-BoldIt.otf を推奨
 
 2. wakuflow は標準入力から「わーくフロー(参考: https://twitter.com/fetus_hina/status/240793399928700928 )」を受け付けるので次の書式で入力
 
@@ -32,7 +34,8 @@
 
     【新枠】
         command: waku_v2
-        option1: screen_name    (→に重ねる文字: 未実装)
+        option1: screen_name
+            ※font の設定が必要
 
     【集中線】
         command: shuchusen1

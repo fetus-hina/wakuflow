@@ -308,4 +308,13 @@ namespace manip {
         };
         return fill_background(img, 0xffffff) && grayscale(img) && apply_operator_3x3(img, filter, 1, 127);
     }
+
+    bool gaussian_blur(gd &img) {
+        const double filter[3][3] = {
+            { 1./16., 2./16., 1./16. },
+            { 2./16., 4./16., 2./16. },
+            { 1./16., 2./16., 1./16. }
+        };
+        return apply_operator_3x3(img, filter, 1, 0);
+    }
 }

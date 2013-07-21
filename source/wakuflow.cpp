@@ -13,6 +13,9 @@
 #include "shuchusen.h"
 #include "manip.h"
 
+//FIXME
+std::string config_waku_font_file;
+
 namespace po = ::boost::program_options;
 
 namespace {
@@ -21,6 +24,7 @@ namespace {
         opt.add_options()
             ("input,i",  po::value<std::string>(), "Input file path")
             ("output,o", po::value<std::string>(), "Output file path")
+            ("font,f", po::value<std::string>(),   "TTF/OTF font path for waku v2")
             ("help,h",                             "Help");
 
         try {
@@ -88,8 +92,11 @@ namespace {
         } else if(command == "waku4") {
             return waku::waku4(image);
         } else if(command == "waku_v2") {
-            //TODO: screen_name
-            return waku_v2::waku_v2(image);
+            if(options.size() < 1) {
+                std::cerr << "waku_v2 コマンドには @name の指定が必要です" << std::endl;
+                return false;
+            }
+            return waku_v2::waku_v2(image, options[0]);
         } else if(command == "shuchusen1") {
             return shuchusen::shuchusen1(image);
         } else if(command == "shuchusen2") {
@@ -153,6 +160,12 @@ int main(int argc, char *argv[]) {
     if(!load_input_file(in_path, binary)) {
         std::cerr << "指定された入力ファイルから読み込めません" << std::endl;
         return 1;
+    }
+
+    if(opt.count("font") == 1) {
+        config_waku_font_file = opt["font"].as<std::string>();
+    } else {
+        config_waku_font_file.clear();
     }
 
     gd current_image;

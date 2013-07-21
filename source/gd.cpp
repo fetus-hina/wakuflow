@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include <boost/swap.hpp>
 #include "gd.h"
 
@@ -205,6 +206,26 @@ void gd::save_png(std::vector<char> &out, int level) const {
     out.assign(static_cast<char*>(bin), static_cast<char*>(bin) + size);
     gdFree(bin);
 }
+
+bool gd::ttf_bbox(const std::string &font, double size, double angle, const std::string &text, int rect[8]) {
+    char *p = ::gdImageStringFT(NULL, rect, 0, const_cast<char*>(font.c_str()), size, angle, 0, 0, const_cast<char*>(text.c_str()));
+    if(p) {
+        std::cerr << p << std::endl;
+        return false;
+    }
+    return true;
+}
+
+bool gd::ttf_draw(const std::string &font, double size, double angle, const std::string &text, int x, int y, int color) {
+    VALIDATE_IMAGE();
+    char *p = ::gdImageStringFT(m_image, NULL, color, const_cast<char*>(font.c_str()), size, angle, x, y, const_cast<char*>(text.c_str()));
+    if(p) {
+        std::cerr << p << std::endl;
+        return false;
+    }
+    return true;
+}
+
 
 bool gd::try_load_png_binary(const char *begin, const char *end) {
     assert(m_image == NULL);

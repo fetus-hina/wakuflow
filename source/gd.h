@@ -55,6 +55,8 @@ public:
 
     void save_png(std::vector<char> &out, int level = -1) const;
 
+    bool ttf_bbox(const std::string &font, double size, double angle, const std::string &text, int rect[8]);
+    bool ttf_draw(const std::string &font, double size, double angle, const std::string &text, int x, int y, int color);
 private:
     bool try_load_png_binary(const char *begin, const char *end);
     bool try_load_jpeg_binary(const char *begin, const char *end);

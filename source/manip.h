@@ -9,5 +9,6 @@ namespace manip {
     bool negate(gd &);
     bool pixelate(gd &, int);
     bool emboss(gd &);
+    bool gaussian_blur(gd &);
 }
 #endif
