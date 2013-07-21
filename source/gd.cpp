@@ -104,6 +104,7 @@ void gd::resize_fit(int target_w, int target_h) {
     VALIDATE_IMAGE();
     assert(target_w > 0);
     assert(target_h > 0);
+    convert_to_true_color();
     const int my_w = width();
     const int my_h = height();
     const double rate = std::max(1.0 * target_w / my_w, 1.0 * target_h / my_h);
@@ -112,7 +113,7 @@ void gd::resize_fit(int target_w, int target_h) {
     
     gd tmp(tmp_w, tmp_h);
     tmp.alpha_blending(false);
-    tmp.fill(0, 0, tmp.color_allocate(0xff, 0xff, 0xff, 0x7f));
+    tmp.fill(0, 0, 0x7fffffff);
     tmp.alpha_blending(true);
     tmp.save_alpha(false);
     tmp.copy_resize(*this, 0, 0, 0, 0, tmp_w, tmp_h, my_w, my_h);
@@ -121,10 +122,10 @@ void gd::resize_fit(int target_w, int target_h) {
     const int crop_y = static_cast<int>(tmp_h / 2.0 - target_h / 2.0 + 0.5);
     gd dst(target_w, target_h);
     dst.alpha_blending(false);
-    dst.fill(0, 0, dst.color_allocate(0xff, 0xff, 0xff, 0x7f));
+    dst.fill(0, 0, 0x7fffffff);
     dst.alpha_blending(true);
     dst.save_alpha(false);
-    dst.copy_merge(tmp, 0, 0, crop_x, crop_y, target_w, target_h, 100);
+    dst.copy(tmp, 0, 0, crop_x, crop_y, target_w, target_h);
 
     swap(dst);
 

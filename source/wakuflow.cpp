@@ -10,6 +10,7 @@
 #include "gd.h"
 #include "waku.h"
 #include "waku_v2.h"
+#include "shuchusen.h"
 #include "manip.h"
 
 namespace po = ::boost::program_options;
@@ -89,6 +90,12 @@ namespace {
         } else if(command == "waku_v2") {
             //TODO: screen_name
             return waku_v2::waku_v2(image);
+        } else if(command == "shuchusen1") {
+            return shuchusen::shuchusen1(image);
+        } else if(command == "shuchusen2") {
+            return shuchusen::shuchusen2(image);
+        } else if(command == "shuchusen3") {
+            return shuchusen::shuchusen3(image);
         } else if(command == "grayscale") {
             return manip::grayscale(image);
         } else if(command == "sepia") {

@@ -34,6 +34,12 @@
         command: waku_v2
         option1: screen_name    (→に重ねる文字: 未実装)
 
+    【集中線】
+        command: shuchusen1
+        command: shuchusen2
+        command: shuchusen3
+        option:  なし
+
     【グレースケール】
         command: grayscale
         option: なし
