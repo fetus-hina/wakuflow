@@ -89,9 +89,7 @@ namespace {
             //TODO: screen_name
             return waku_v2::waku_v2(image);
         } else if(command == "grayscale") {
-            using namespace manip;
-            const GRAYSCALE_METHOD me = options.size() > 0 && options[0] == "avg" ? GRAY_AVERAGE : GRAY_NTSC;
-            return grayscale(image, me);
+            return manip::grayscale(image);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
