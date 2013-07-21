@@ -41,3 +41,11 @@
     【セピア】
         command: sepia
         option: なし
+
+    【二色化】
+        command: binarize
+        option: なし
+
+    【八色化】
+        command: 8colors
+        option: なし

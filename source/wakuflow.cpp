@@ -76,7 +76,7 @@ namespace {
     }
 
 
-    bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &options) {
+    bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &/*options*/) {
         if(command == "waku1") {
             return waku::waku1(image);
         } else if(command == "waku2") {
@@ -92,6 +92,10 @@ namespace {
             return manip::grayscale(image);
         } else if(command == "sepia") {
             return manip::grayscale(image) && manip::colorize(image, 100, 50, 0, 0);
+        } else if(command == "binarize") {
+            return manip::grayscale(image) && manip::binarize(image, true);
+        } else if(command == "8colors") {
+            return manip::binarize(image, false);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
