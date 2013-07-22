@@ -43,6 +43,10 @@
         command: shuchusen3
         option:  なし
 
+    【ろ。】
+        command: romanov
+        option:  なし
+
     【グレースケール】
         command: grayscale
         option: なし
