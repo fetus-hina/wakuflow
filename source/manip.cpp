@@ -61,7 +61,6 @@ namespace manip {
             for(int y = 0; y < height; ++y) {
                 for(int x = 0; x < width; ++x) {
                     double sum_r = 0., sum_g = 0., sum_b = 0., sum_a = 0.;
-                    int pixel_count = 0;
                     for(int j = -1; j <= 1; ++j) {
                         const int ref_y = std::min(std::max(0, y + j), height - 1);
                         for(int i = -1; i <= 1; ++i) {
@@ -70,9 +69,8 @@ namespace manip {
                             const gd::color color = img.pixel_fast(ref_x, ref_y);
                             const int a = (color & 0x7f000000) >> 24;
                             if(a == 0x7f) {
-                                continue;
-                            }
-                            if(std::abs(ref_op) > 0.0001) {
+                                sum_a += a * ref_op;
+                            } else if(std::abs(ref_op) > 0) {
                                 const int r = (color & 0xff0000) >> 16;
                                 const int g = (color & 0x00ff00) >> 8;
                                 const int b = (color & 0x0000ff);
@@ -81,19 +79,14 @@ namespace manip {
                                 sum_b += b * ref_op;
                                 sum_a += a * ref_op;
                             }
-                            ++pixel_count;
                         }
                     }
 
-                    if(pixel_count > 0) {
-                        const int r = std::max(0, std::min(255, static_cast<int>(sum_r / filter_div + offset + 0.5)));
-                        const int g = std::max(0, std::min(255, static_cast<int>(sum_g / filter_div + offset + 0.5)));
-                        const int b = std::max(0, std::min(255, static_cast<int>(sum_b / filter_div + offset + 0.5)));
-                        const int a = std::max(0, std::min(127, static_cast<int>(sum_a + 0.5)));
-                        dst.pixel_fast(x, y, (a << 24) | (r << 16) | (g << 8) | b);
-                    } else {
-                        dst.pixel_fast(x, y, 0x7fffffff);
-                    }
+                    const int r = std::max(0, std::min(255, static_cast<int>(sum_r / filter_div + offset + 0.5)));
+                    const int g = std::max(0, std::min(255, static_cast<int>(sum_g / filter_div + offset + 0.5)));
+                    const int b = std::max(0, std::min(255, static_cast<int>(sum_b / filter_div + offset + 0.5)));
+                    const int a = std::max(0, std::min(127, static_cast<int>(sum_a + 0.5)));
+                    dst.pixel_fast(x, y, (a << 24) | (r << 16) | (g << 8) | b);
                 }
             }
             img.swap(dst);
@@ -315,6 +308,15 @@ namespace manip {
             { 1./16., 2./16., 1./16. },
             { 2./16., 4./16., 2./16. },
             { 1./16., 2./16., 1./16. }
+        };
+        return apply_operator_3x3(img, filter, 1, 0);
+    }
+
+    bool sharpen(gd &img) {
+        const double filter[3][3] = {
+            { -1., -1., -1. },
+            { -1.,  9., -1. },
+            { -1., -1., -1. }
         };
         return apply_operator_3x3(img, filter, 1, 0);
     }

@@ -63,6 +63,18 @@
         command: nagate
         option: なし
 
+    【エンボス加工】
+        command: emboss
+        option: なし
+
+    【ガウスぼかし】
+        command: gaussian_blur
+        option: なし
+
+    【エッジ強調】
+        command: sharpen
+        option: なし
+
     【モザイク】
         command: pixelate
         option1: モザイクサイズ(int)
