@@ -10,5 +10,6 @@ namespace manip {
     bool pixelate(gd &, int);
     bool emboss(gd &);
     bool gaussian_blur(gd &);
+    bool rotate_fast(gd &, int degree);
 }
 #endif

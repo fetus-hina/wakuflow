@@ -33,6 +33,7 @@ public:
     void copy(const gd &src, int dstX, int dstY, int srcX, int srcY, int w, int h);
     void copy_merge(const gd &src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct);
     void copy_resize(const gd &src, int dx, int dy, int sx, int sy, int dw, int dh, int sw, int sh);
+    void copy_rotated(const gd &src, double dx, double dy, int sx, int sy, int sw, int sh, int angle);
     void fill(int x, int y, color c);
     void fill_rect(int x1, int y1, int x2, int y2, color c);
     void resize_fit(int w, int h);

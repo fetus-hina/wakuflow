@@ -1,6 +1,7 @@
 #include "manip.h"
 #include <iostream>
 #include <cmath>
+#include <cassert>
 #include "gd.h"
 #include "../image/image.h"
 
@@ -316,5 +317,20 @@ namespace manip {
             { 1./16., 2./16., 1./16. }
         };
         return apply_operator_3x3(img, filter, 1, 0);
+    }
+
+    bool rotate_fast(gd &img, int degree) {
+        degree %= 360;
+        assert(degree % 90 == 0);
+        if(degree == 0) {
+            return true;
+        }
+        const int width = img.width();
+        const int height = img.height();
+        gd dst(height, width);
+        dst.alpha(false, true);
+        dst.copy_rotated(img, height / 2.0, width / 2.0, 0, 0, width, height, degree);
+        img.swap(dst);
+        return true;
     }
 }

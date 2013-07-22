@@ -91,6 +91,11 @@ void gd::copy_resize(const gd &src, int dx, int dy, int sx, int sy, int dw, int 
     ::gdImageCopyResampled(m_image, src.m_image, dx, dy, sx, sy, dw, dh, sw, sh);
 }
 
+void gd::copy_rotated(const gd &src, double dx, double dy, int sx, int sy, int sw, int sh, int angle) {
+    VALIDATE_IMAGE();
+    ::gdImageCopyRotated(m_image, src.m_image, dx, dy, sx, sy, sw, sh, angle);
+}
+
 void gd::fill(int x, int y, color c) {
     VALIDATE_IMAGE();
     ::gdImageFill(m_image, x, y, c);

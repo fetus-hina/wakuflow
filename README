@@ -66,3 +66,11 @@
     【モザイク】
         command: pixelate
         option1: モザイクサイズ(int)
+
+    【回転】
+        command: rotate
+        option1: 回転角度(0, 90, 180, 270)
+                      0: 無意味
+                     90: 左回転
+                    180: 半回転
+                    270: 右回転

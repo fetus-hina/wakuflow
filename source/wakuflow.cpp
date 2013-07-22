@@ -130,6 +130,22 @@ namespace {
             }
         } else if(command == "emboss") {
             return manip::emboss(image);
+        } else if(command == "rotate") {
+            if(options.size() < 1) {
+                std::cerr << "rotate コマンドには角度の指定が必要です" << std::endl;
+                return false;
+            }
+            try {
+                const int angle = boost::lexical_cast<int>(options[0]);
+                if(angle != 0 && angle != 90 && angle != 180 && angle != 270) {
+                    std::cerr << "rotate コマンドの角度は 0, 90, 180, 270 のいずれかである必要があります" << std::endl;
+                    return false;
+                }
+                return manip::rotate_fast(image, angle); // TODO:一般化
+            } catch(boost::bad_lexical_cast) {
+                std::cerr << "rotate コマンドの引数は整数を設定してください" << std::endl;
+                return false;
+            }
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
