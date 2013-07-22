@@ -333,4 +333,30 @@ namespace manip {
         img.swap(dst);
         return true;
     }
+
+    bool flip_horizontal(gd &img) {
+        const int width = img.width();
+        const int height = img.height();
+        gd dst(width, height);
+        dst.alpha(false, true);
+        for(int x = 0; x < width; ++x) {
+            const int x2 = width - x - 1;
+            dst.copy(img, x2, 0, x, 0, 1, height);
+        }
+        img.swap(dst);
+        return true;
+    }
+
+    bool flip_vertical(gd &img) {
+        const int width = img.width();
+        const int height = img.height();
+        gd dst(width, height);
+        dst.alpha(false, true);
+        for(int y = 0; y < height; ++y) {
+            const int y2 = height - y - 1;
+            dst.copy(img, 0, y2, 0, y, width, 1);
+        }
+        img.swap(dst);
+        return true;
+    }
 }

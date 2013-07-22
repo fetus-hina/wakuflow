@@ -146,6 +146,19 @@ namespace {
                 std::cerr << "rotate コマンドの引数は整数を設定してください" << std::endl;
                 return false;
             }
+        } else if(command == "flip") {
+            if(options.size() < 1) {
+                std::cerr << "flip コマンドには vertical, horizontal の指定が必要です" << std::endl;
+                return false;
+            }
+            if(options[0] == "vertical") {
+                return manip::flip_vertical(image);
+            } else if(options[0] == "horizontal") {
+                return manip::flip_horizontal(image);
+            } else {
+                std::cerr << "flip コマンドには vertical, horizontal の指定が必要です" << std::endl;
+                return false;
+            }
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
