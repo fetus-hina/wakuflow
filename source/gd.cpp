@@ -165,6 +165,12 @@ gd::color gd::pixel_fast(int x, int y) const {
         : gdImageTrueColorPixel(m_image, x, y);
 }
 
+gd::color gd::pixel_safe(int x, int y) const {
+    x = std::max(0, std::min(x, width() - 1));
+    y = std::max(0, std::min(y, height() - 1));
+    return pixel(x, y);
+}
+
 gd::color gd::color_allocate(uint8_t r, uint8_t g, uint8_t b) {
     VALIDATE_IMAGE();
     return ::gdImageColorAllocate(m_image, r, g, b);

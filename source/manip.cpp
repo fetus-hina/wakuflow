@@ -321,6 +321,160 @@ namespace manip {
         return apply_operator_3x3(img, filter, 1, 0);
     }
 
+    bool edge(gd &img) {
+        const double sobel_h[3][3] = {
+            { 1, 0, -1 },
+            { 2, 0, -2 },
+            { 1, 0, -1 }
+        };
+        const double sobel_v[3][3] = {
+            {  1,  2,  1 },
+            {  0,  0,  0 },
+            { -1, -2, -1 }
+        };
+
+        if(!fill_background(img, 0xffffff) || !grayscale(img)) {
+            return false;
+        }
+
+        // ぼかす
+        if(!gaussian_blur(img) || !gaussian_blur(img) || !gaussian_blur(img)) {
+            return false;
+        }
+        const int width = img.width();
+        const int height = img.height();
+
+        // 勾配検出
+        {
+            gd horizontal(width, height);
+            horizontal.alpha(false, false);
+            horizontal.copy(img, 0, 0, 0, 0, width, height);
+            if(!apply_operator_3x3(horizontal, sobel_h, 1, 127)) {
+                return false;
+            }
+            gd vertical(width, height);
+            vertical.alpha(false, false);
+            vertical.copy(img, 0, 0, 0, 0, width, height);
+            if(!apply_operator_3x3(vertical, sobel_v, 1, 127)) {
+                return false;
+            }
+            for(int y = 0; y < height; ++y) {
+                for(int x = 0; x < width; ++x) {
+                    const double h = std::min(1.0, static_cast<double>((horizontal.pixel(x, y) & 0xff) - 127) / 127.0);
+                    const double v = std::min(1.0, static_cast<double>((vertical.pixel(x, y) & 0xff) - 127) / 127.0);
+                    const int edge = std::max(0, std::min(255, static_cast<int>(sqrt(h * h + v * v) * 255.0 + 0.5)));
+                    const double theta = atan2(h, v) * 180.0 / M_PI;
+                    const int direction_code = 
+                        (theta < 22.5) ? 1 :                // 右
+                        (theta < 22.5 + 45.0 * 1) ? 2 :     // 右上
+                        (theta < 22.5 + 45.0 * 2) ? 3 :     // 上
+                        (theta < 22.5 + 45.0 * 3) ? 4 : 5;  // 左上・左 180°を超えることはない…はず
+                    img.pixel(x, y, (direction_code << 8) | edge);
+                }
+            }
+        }
+
+        // 細線化（と後の処理のためにヒストグラム作成）
+        int hist[256] = {};
+        long long sum = 0;
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const int direction_code = (img.pixel(x, y) & 0xff00) >> 8;
+                const int c0 = img.pixel(x, y) & 0xff;
+                int c1, c2;
+                switch(direction_code) {
+                case 1: case 5: // 左右
+                    c1 = img.pixel_safe(x + 1, y) & 0xff;
+                    c2 = img.pixel_safe(x - 1, y) & 0xff;
+                    break;
+                case 2: // 右上
+                    c1 = img.pixel_safe(x + 1, y - 1) & 0xff;
+                    c2 = img.pixel_safe(x - 1, y + 1) & 0xff;
+                    break;
+                case 3: // 上
+                    c1 = img.pixel_safe(x, y - 1) & 0xff;
+                    c2 = img.pixel_safe(x, y + 1) & 0xff;
+                    break;
+                case 4: // 左上
+                    c1 = img.pixel_safe(x - 1, y - 1) & 0xff;
+                    c2 = img.pixel_safe(x + 1, y + 1) & 0xff;
+                    break;
+                default:
+                    assert(false);
+                    return false;
+                }
+                if(c0 < c1 || c0 < c2) {
+                    img.pixel(x, y, 0x000000);
+                    ++hist[0];
+                } else {
+                    img.pixel(x, y, 0x010101 * c0);
+                    ++hist[c0];
+                    sum += c0;
+                }
+            }
+        }
+
+        // 閾値(HI)を計算
+        const int hi_threshold = otsu_threshold((double)sum / ((double)width * (double)height), hist);
+
+        // 閾値(LO)を計算
+        sum = 0;
+        for(int i = 0; i < 256; ++i) {
+            if(i < hi_threshold) {
+                sum += hist[i] * i;
+            } else if(i == hi_threshold) {
+                // nothing to do.
+            } else {
+                // 閾値(HI)以上の画素は全部閾値(HI)と見なす
+                sum += hist[i] * hi_threshold;
+                hist[hi_threshold] += hist[i];
+                hist[i] = 0;
+            }
+        }
+        const int lo_threshold = otsu_threshold((double)sum / ((double)width * (double)height), hist);
+
+        gd dst(width, height);
+        dst.alpha(false, true);
+        // 閾値HI以上の画素を描画
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                dst.pixel_fast(x, y, (img.pixel_fast(x, y) & 0xff) >= hi_threshold ? 0xffffff : 0x000000);
+            }
+        }
+        // 閾値LO以上HI未満の画素をそれなりに描画
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const int c = img.pixel_fast(x, y) & 0xff;
+                if(lo_threshold <= c && c < hi_threshold) {
+                    bool found = false;
+                    for(int j = -1; j <= 1; ++j) {
+                        for(int i = -1; i <= 1; ++i) {
+                            if(i == 0 && j == 0) {
+                                // 自分の画素を見ても仕方ない
+                                continue;
+                            }
+                            // 近所にエッジは居る？
+                            if((img.pixel_safe(x + i, y + j) & 0xff) >= hi_threshold) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(found) {
+                            break;
+                        }
+                    }
+                    if(found) {
+                        dst.pixel_fast(x, y, 0xffffff);
+                    }
+                }
+            }
+        }
+
+        img.swap(dst);
+
+        return true;
+    }
+
     bool rotate_fast(gd &img, int degree) {
         degree %= 360;
         assert(degree % 90 == 0);

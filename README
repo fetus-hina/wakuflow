@@ -75,6 +75,10 @@
         command: sharpen
         option: なし
 
+    【エッジ検出】
+        command: edge
+        option: なし
+
     【モザイク】
         command: pixelate
         option1: モザイクサイズ(int)

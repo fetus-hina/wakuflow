@@ -11,6 +11,7 @@ namespace manip {
     bool emboss(gd &);
     bool gaussian_blur(gd &);
     bool sharpen(gd &);
+    bool edge(gd &);
     bool rotate_fast(gd &, int degree);
     bool flip_horizontal(gd &);
     bool flip_vertical(gd &);

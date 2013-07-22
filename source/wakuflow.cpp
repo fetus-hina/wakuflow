@@ -134,6 +134,8 @@ namespace {
             return manip::gaussian_blur(image);
         } else if(command == "sharpen") {
             return manip::sharpen(image);
+        } else if(command == "edge") {
+            return manip::edge(image);
         } else if(command == "rotate") {
             if(options.size() < 1) {
                 std::cerr << "rotate コマンドには角度の指定が必要です" << std::endl;
