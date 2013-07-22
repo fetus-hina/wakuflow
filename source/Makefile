@@ -1,18 +1,22 @@
-SRCS=wakuflow.cpp waku.cpp waku_v2.cpp shuchusen.cpp manip.cpp gd.cpp
+SRCS=$(shell ls *.cpp)
 OBJS=$(SRCS:.cpp=.o)
 TARGET=wakuflow
 
-.PHONY: all clean
+CXX=/usr/bin/g++
+CXXFLAGS=-O2 -march=native -Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith
+LDFLAGS=-lgd -lboost_program_options
 
-all: $(TARGET)
+.PHONY: all clean depend
+
+all: $(DEPEND) $(TARGET)
+
+depend:
 
 %.o: %.cpp
-	g++ -c -O2 -march=native \
-		-Wall -Wextra -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith \
-		-o $@ $<
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 	
 $(TARGET): $(OBJS)
-	g++ -o $(TARGET) $(OBJS) ../image/libimage.a -lgd -lboost_program_options
+	$(CXX) -o $(TARGET) $(OBJS) ../image/libimage.a $(LDFLAGS)
 
 clean:
-	$(RM) $(OBJS) $(TARGET)
+	$(RM) $(OBJS) $(DEPEND) $(TARGET)

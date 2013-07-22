@@ -11,6 +11,7 @@
 #include "waku.h"
 #include "waku_v2.h"
 #include "shuchusen.h"
+#include "stamp.h"
 #include "manip.h"
 
 //FIXME
@@ -103,6 +104,8 @@ namespace {
             return shuchusen::shuchusen2(image);
         } else if(command == "shuchusen3") {
             return shuchusen::shuchusen3(image);
+        } else if(command == "half_price") {
+            return stamp::half_price(image);
         } else if(command == "grayscale") {
             return manip::grayscale(image);
         } else if(command == "sepia") {

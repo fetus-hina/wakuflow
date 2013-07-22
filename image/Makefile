@@ -1,10 +1,10 @@
-IMAGES=waku1.png waku2.png waku3.png waku4.png waku_v2.png shuchusen1.png shuchusen2.png shuchusen3.png
+IMAGES=$(shell ls *.png) 
 OBJS=$(IMAGES:.png=.o)
 TARGET=libimage.a
 HEADER=image.h
 OBJCOPY=/usr/bin/objcopy
 
-.PHONY: all clean
+.PHONY: all clean depend
 
 all: $(OBJS) $(HEADER) $(TARGET)
 
@@ -30,3 +30,5 @@ $(TARGET): $(OBJS)
 
 clean:
 	$(RM) $(OBJS) $(HEADER) $(TARGET)
+
+depend:
