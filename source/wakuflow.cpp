@@ -109,6 +109,8 @@ namespace {
             return romanov::romanov(image);
         } else if(command == "half_price") {
             return stamp::half_price(image);
+        } else if(command == "kankore_half_damage") {
+            return stamp::kankore_half_damage(image);
         } else if(command == "grayscale") {
             return manip::grayscale(image);
         } else if(command == "sepia") {

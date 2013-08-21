@@ -23,4 +23,9 @@ namespace stamp {
         gd stamp(_binary_half_price_png_start, _binary_half_price_png_end);
         return proc(icon, stamp);
     }
+
+    bool kankore_half_damage(gd &icon) {
+        gd stamp(_binary_kankore_half_damage_png_start, _binary_kankore_half_damage_png_end);
+        return proc(icon, stamp);
+    }
 }

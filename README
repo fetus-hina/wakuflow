@@ -43,6 +43,14 @@
         command: shuchusen3
         option:  なし
 
+    【半額】
+        command: half_price
+        option:  なし
+
+    【中破（艦これ）】
+        command: kankore_half_damage
+        option:  なし
+
     【ろ。】
         command: romanov
         option:  なし

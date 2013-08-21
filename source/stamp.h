@@ -4,5 +4,6 @@
 class gd;
 namespace stamp {
     bool half_price(gd &);
+    bool kankore_half_damage(gd &);
 }
 #endif
