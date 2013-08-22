@@ -111,6 +111,8 @@ namespace {
             return stamp::half_price(image);
         } else if(command == "kankore_half_damage") {
             return stamp::kankore_half_damage(image);
+        } else if(command == "kankore_badly_damage") {
+            return stamp::kankore_badly_damage(image);
         } else if(command == "grayscale") {
             return manip::grayscale(image);
         } else if(command == "sepia") {

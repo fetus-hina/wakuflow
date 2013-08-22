@@ -28,4 +28,9 @@ namespace stamp {
         gd stamp(_binary_kankore_half_damage_png_start, _binary_kankore_half_damage_png_end);
         return proc(icon, stamp);
     }
+
+    bool kankore_badly_damage(gd &icon) {
+        gd stamp(_binary_kankore_badly_damage_png_start, _binary_kankore_badly_damage_png_end);
+        return proc(icon, stamp);
+    }
 }
