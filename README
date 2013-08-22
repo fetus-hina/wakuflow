@@ -51,6 +51,10 @@
         command: kankore_half_damage
         option:  なし
 
+    【大破（艦これ）】
+        command: kankore_badly_damage
+        option:  なし
+
     【ろ。】
         command: romanov
         option:  なし
