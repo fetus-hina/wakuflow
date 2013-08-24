@@ -481,11 +481,13 @@ namespace manip {
         if(degree == 0) {
             return true;
         }
-        const int width = img.width();
-        const int height = img.height();
-        gd dst(height, width);
+        const int src_width  = img.width();
+        const int src_height = img.height();
+        const int dst_width  = degree % 180 == 0 ? src_width : src_height;
+        const int dst_height = degree % 180 == 0 ? src_height : src_width;
+        gd dst(dst_width, dst_height);
         dst.alpha(false, true);
-        dst.copy_rotated(img, height / 2.0, width / 2.0, 0, 0, width, height, degree);
+        dst.copy_rotated(img, dst_width / 2.0, dst_height / 2.0, 0, 0, src_width, src_height, degree);
         img.swap(dst);
         return true;
     }
