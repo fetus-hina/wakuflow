@@ -264,7 +264,7 @@ namespace manip {
                 const int web_r = convert_to_websafe_color(r + gosa[x][y][0]);
                 const int web_g = convert_to_websafe_color(g + gosa[x][y][1]);
                 const int web_b = convert_to_websafe_color(b + gosa[x][y][2]);
-                if(a < 0x7f) {
+                if(a < 0x7f000000) {
                     const int gosa_r = r - web_r;
                     const int gosa_g = g - web_g;
                     const int gosa_b = b - web_b;
