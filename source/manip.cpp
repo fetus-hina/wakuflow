@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <boost/multi_array.hpp>
 #include "gd.h"
 #include "../image/image.h"
 
@@ -91,6 +92,14 @@ namespace manip {
             }
             img.swap(dst);
             return true;
+        }
+
+        inline int convert_to_websafe_color(int c) {
+            return c < 0
+                ? 0
+                : c > 255
+                    ? 255
+                    : ((int)round(c / 51.)) * 51;
         }
     }
 
@@ -222,6 +231,65 @@ namespace manip {
             }
         }
         return true;
+    }
+
+    bool websafe(gd &img) {
+#       define WEBSAFE_GOSA_KAKUSAN(dx, dy, rate, rate_total) do { \
+            const int tx = x + d * dx; \
+            const int ty = y + dy; \
+            if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
+                gosa[tx][ty][0] += (int)round(gosa_r * rate / rate_total); \
+                gosa[tx][ty][1] += (int)round(gosa_g * rate / rate_total); \
+                gosa[tx][ty][2] += (int)round(gosa_b * rate / rate_total); \
+            } \
+        } while(0)
+
+        img.convert_to_true_color();
+        img.alpha_blending(false);
+        const int width = img.width();
+        const int height = img.height();
+        boost::multi_array<int, 3> gosa(boost::extents[width][height][3]);
+        std::fill(gosa.origin(), gosa.origin() + gosa.size(), 0); // 要らない？
+
+        for(int y = 0; y < height; ++y) {
+            const int d = (y % 2 == 0) ? 1 : -1;
+            const int x_begin = (y % 2 == 0) ? 0 : width - 1;
+            const int x_end   = (y % 2 == 0) ? width : -1;
+            for(int x = x_begin; x != x_end; x += d) {
+                const gd::color color = img.pixel_fast(x, y);
+                const int a = (color & 0x7f000000);
+                const int r = (color & 0x00ff0000) >> 16;
+                const int g = (color & 0x0000ff00) >> 8;
+                const int b = (color & 0x000000ff);
+                const int web_r = convert_to_websafe_color(r + gosa[x][y][0]);
+                const int web_g = convert_to_websafe_color(g + gosa[x][y][1]);
+                const int web_b = convert_to_websafe_color(b + gosa[x][y][2]);
+                if(a < 0x7f) {
+                    const int gosa_r = r - web_r;
+                    const int gosa_g = g - web_g;
+                    const int gosa_b = b - web_b;
+                    if(gosa_r != 0 || gosa_g != 0 || gosa_b != 0) {
+                        // Sierra 3line
+                        // - - X 5 3
+                        // 2 4 5 4 2
+                        // 0 2 3 2 0
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 5., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 3., 32.);
+                        WEBSAFE_GOSA_KAKUSAN(-2, 1, 2., 32.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 4., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 5., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 4., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 1, 2., 32.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 2, 2., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 2, 3., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                    }
+                }
+                img.pixel_fast(x, y, a | (web_r << 16) | (web_g << 8) | web_b);
+            }
+        }
+        return true;
+#undef WEBSAFE_GOSA_KAKUSAN
     }
 
     bool negate(gd &img) {

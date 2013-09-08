@@ -121,6 +121,8 @@ namespace {
             return manip::grayscale(image) && manip::binarize(image, true);
         } else if(command == "8colors") {
             return manip::binarize(image, false);
+        } else if(command == "websafe") {
+            return manip::websafe(image);
         } else if(command == "negate") {
             return manip::negate(image);
         } else if(command == "pixelate") {

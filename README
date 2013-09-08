@@ -75,6 +75,10 @@
         command: 8colors
         option: なし
 
+    【ウェブセーフカラー】
+        command: websafe
+        option: なし
+
     【ネガ】
         command: nagate
         option: なし
