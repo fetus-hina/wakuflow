@@ -81,7 +81,13 @@
 
     【ファミコン(NES)パレット】
         command: famicom
-        option: なし
+        option1: ディザリング方法(省略可)
+            - none          ディザリングなし
+            - floyd         Floyd-Steinberg
+            - sierra3       Sierra (3 line)
+            - sierra2       Sierra (2 line)
+            - sierra-lite   Sierra Lite
+            - atkinson      Atkinson
 
     【ネガ】
         command: nagate

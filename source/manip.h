@@ -3,11 +3,20 @@
 #define MANIP_H_
 class gd;
 namespace manip {
+    enum DITHERING_METHOD {
+        DITHERING_NONE,
+        DITHERING_FLOYD_STEINBERG,
+        DITHERING_SIERRA_3LINE,
+        DITHERING_SIERRA_2LINE,
+        DITHERING_SIERRA_LITE,
+        DITHERING_ATKINSON,
+    };
+
     bool grayscale(gd &);
     bool colorize(gd &, int r, int g, int b, int a);
     bool binarize(gd &, bool is_grayscaled);
     bool websafe(gd &);
-    bool famicom(gd &);
+    bool famicom(gd &, DITHERING_METHOD m);
     bool negate(gd &);
     bool pixelate(gd &, int);
     bool emboss(gd &);

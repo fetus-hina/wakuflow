@@ -124,7 +124,18 @@ namespace {
         } else if(command == "websafe") {
             return manip::websafe(image);
         } else if(command == "famicom") {
-            return manip::famicom(image);
+            manip::DITHERING_METHOD method = manip::DITHERING_NONE;
+            if(options.size() >= 1) {
+                const std::string m = options[0];
+                if(m == "none")             { method = manip::DITHERING_NONE; }
+                else if(m == "floyd")       { method = manip::DITHERING_FLOYD_STEINBERG; }
+                else if(m == "sierra3")     { method = manip::DITHERING_SIERRA_3LINE; }
+                else if(m == "sierra2")     { method = manip::DITHERING_SIERRA_2LINE; }
+                else if(m == "sierra-lite") { method = manip::DITHERING_SIERRA_LITE; }
+                else if(m == "atkinson")    { method = manip::DITHERING_ATKINSON; }
+                else { std::cerr << "不明なディザリングメソッド: " << m << std::endl; }
+            }
+            return manip::famicom(image, method);
         } else if(command == "negate") {
             return manip::negate(image);
         } else if(command == "pixelate") {

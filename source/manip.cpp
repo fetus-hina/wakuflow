@@ -147,7 +147,7 @@ namespace manip {
             return min_index;
         }
 
-        int famicom_convert(gd &img, const int palette[], const size_t palette_size, int used_count[]) {
+        int famicom_convert(gd &img, DITHERING_METHOD dither, const int palette[], const size_t palette_size, int used_count[]) {
 #           define FAMICOM_GOSA_KAKUSAN(dx, dy, rate, rate_total) do { \
                 const int tx = x + d * dx; \
                 const int ty = y + dy; \
@@ -186,20 +186,63 @@ namespace manip {
                     const double gosa_cb = cb - p_cb;
                     const double gosa_cr = cr - p_cr;
 
-                    // Sierra 3line
-                    // - - X 5 3
-                    // 2 4 5 4 2
-                    // 0 2 3 2 0
-                    FAMICOM_GOSA_KAKUSAN( 1, 0, 5., 32.);
-                    FAMICOM_GOSA_KAKUSAN( 2, 0, 3., 32.);
-                    FAMICOM_GOSA_KAKUSAN(-2, 1, 2., 32.);
-                    FAMICOM_GOSA_KAKUSAN(-1, 1, 4., 32.);
-                    FAMICOM_GOSA_KAKUSAN( 0, 1, 5., 32.);
-                    FAMICOM_GOSA_KAKUSAN( 1, 1, 4., 32.);
-                    FAMICOM_GOSA_KAKUSAN( 2, 1, 2., 32.);
-                    FAMICOM_GOSA_KAKUSAN(-1, 2, 2., 32.);
-                    FAMICOM_GOSA_KAKUSAN( 0, 2, 3., 32.);
-                    FAMICOM_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                    switch(dither) {
+                    case DITHERING_NONE:
+                    default:
+                        break;
+                    case DITHERING_FLOYD_STEINBERG:
+                        // - X 7
+                        // 3 5 1
+                        FAMICOM_GOSA_KAKUSAN( 1, 0, 7., 16.);
+                        FAMICOM_GOSA_KAKUSAN(-1, 0, 3., 16.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 0, 5., 16.);
+                        FAMICOM_GOSA_KAKUSAN( 1, 0, 1., 16.);
+                        break;
+                    case DITHERING_SIERRA_3LINE:
+                        // - - X 5 3
+                        // 2 4 5 4 2
+                        // 0 2 3 2 0
+                        FAMICOM_GOSA_KAKUSAN( 1, 0, 5., 32.);
+                        FAMICOM_GOSA_KAKUSAN( 2, 0, 3., 32.);
+                        FAMICOM_GOSA_KAKUSAN(-2, 1, 2., 32.);
+                        FAMICOM_GOSA_KAKUSAN(-1, 1, 4., 32.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 1, 5., 32.);
+                        FAMICOM_GOSA_KAKUSAN( 1, 1, 4., 32.);
+                        FAMICOM_GOSA_KAKUSAN( 2, 1, 2., 32.);
+                        FAMICOM_GOSA_KAKUSAN(-1, 2, 2., 32.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 2, 3., 32.);
+                        FAMICOM_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                        break;
+                    case DITHERING_SIERRA_2LINE:
+                        // - - X 4 3
+                        // 1 2 3 2 1
+                        FAMICOM_GOSA_KAKUSAN( 1, 0, 4., 16.);
+                        FAMICOM_GOSA_KAKUSAN( 2, 0, 3., 16.);
+                        FAMICOM_GOSA_KAKUSAN(-2, 1, 1., 16.);
+                        FAMICOM_GOSA_KAKUSAN(-1, 1, 2., 16.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 1, 3., 16.);
+                        FAMICOM_GOSA_KAKUSAN( 1, 1, 2., 16.);
+                        FAMICOM_GOSA_KAKUSAN( 2, 1, 1., 16.);
+                        break;
+                    case DITHERING_SIERRA_LITE:
+                        // - X 2
+                        // 1 1 0
+                        FAMICOM_GOSA_KAKUSAN( 1, 0, 2., 4.);
+                        FAMICOM_GOSA_KAKUSAN(-1, 1, 1., 4.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 1, 1., 4.);
+                        break;
+                    case DITHERING_ATKINSON:
+                        // - - X 1 1
+                        // 0 1 1 1 0
+                        // 0 0 1 0 0 ※合計6だが8で割る(75%拡散)
+                        FAMICOM_GOSA_KAKUSAN( 1, 0, 1., 8.);
+                        FAMICOM_GOSA_KAKUSAN( 2, 0, 1., 8.);
+                        FAMICOM_GOSA_KAKUSAN(-1, 1, 1., 8.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 1, 1., 8.);
+                        FAMICOM_GOSA_KAKUSAN( 1, 1, 1., 8.);
+                        FAMICOM_GOSA_KAKUSAN( 0, 2, 1., 8.);
+                        break;
+                    }
                 }
             }
             int count = 0;
@@ -210,6 +253,7 @@ namespace manip {
             }
             return count;
         }
+#undef FAMICOM_GOSA_KAKUSAN
     }
 
     bool fill_background(gd &img, gd::color bg) {
@@ -401,7 +445,7 @@ namespace manip {
 #undef WEBSAFE_GOSA_KAKUSAN
     }
 
-    bool famicom(gd &img) {
+    bool famicom(gd &img, DITHERING_METHOD dither) {
         const int fixed_palette_y_cb_cr[] = {
             0x008080, 0x1bde71, 0x24fe6c, 0x32975e, 0x3462bc, 0x34635b, 0x346394, 0x3774d1,
             0x3c5ecd, 0x3d5d54, 0x3fa9bf, 0x46584e, 0x47c582, 0x5185eb, 0x57df47, 0x5ec1db,
@@ -417,7 +461,7 @@ namespace manip {
             return false;
         }
         // それっぽさを出すために解像度を落とす
-        img.resize_fit((img.width() + 2) / 3, (img.height() + 2) / 3);
+        img.resize_fit((img.width() + 1) / 2, (img.height() + 1) / 2);
 
         // 画像を破壊しないためにコピーを作る
         gd img_tmp(img.width(), img.height());
@@ -426,7 +470,7 @@ namespace manip {
 
         // 1 パス目: とりあえず変換する
         std::vector<int> palette_use_count(fixed_palette_count);
-        const int color_count = famicom_convert(img_tmp, fixed_palette_y_cb_cr, fixed_palette_count, &palette_use_count[0]);
+        const int color_count = famicom_convert(img_tmp, dither, fixed_palette_y_cb_cr, fixed_palette_count, &palette_use_count[0]);
         if(color_count <= 25) {
             // 1 パスで同時発色可能数に収まった
             img.swap(img_tmp);
@@ -451,12 +495,12 @@ namespace manip {
             }
 
             palette_use_count.resize(25);
-            famicom_convert(img, palette, 25, &palette_use_count[0]);
+            famicom_convert(img, dither, palette, 25, &palette_use_count[0]);
         }
 
         // 解像度を下げたので元（とほとんど同じ）サイズに変更する
         // GD の拡大が nearest neighbor なことに依存している
-        img.resize_fit(img.width() * 3, img.height() * 3);
+        img.resize_fit(img.width() * 2, img.height() * 2);
         return true;
     }
 
