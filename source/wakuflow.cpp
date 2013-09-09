@@ -123,6 +123,8 @@ namespace {
             return manip::binarize(image, false);
         } else if(command == "websafe") {
             return manip::websafe(image);
+        } else if(command == "famicom") {
+            return manip::famicom(image);
         } else if(command == "negate") {
             return manip::negate(image);
         } else if(command == "pixelate") {

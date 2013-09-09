@@ -2,7 +2,11 @@
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <vector>
+#include <utility>
+#include <algorithm>
 #include <boost/multi_array.hpp>
+#include <boost/bind.hpp>
 #include "gd.h"
 #include "../image/image.h"
 
@@ -100,6 +104,117 @@ namespace manip {
                 : c > 255
                     ? 255
                     : ((int)round(c / 51.)) * 51;
+        }
+
+        inline int rgb_to_y(int r, int g, int b) {
+            return (int)round((0.299 * (double)r) + (0.587 * (double)g) + (0.114 * (double)b));
+        }
+
+        inline int rgb_to_cb(int r, int g, int b) {
+            return (int)round((-0.169 * (double)r) - (0.331 * (double)g) + (0.500 * (double)b) + 128.0);
+        }
+
+        inline int rgb_to_cr(int r, int g, int b) {
+            return (int)round((0.500 * (double)r) - (0.419 * (double)g) - (0.081 * (double)b) + 128.0);
+        }
+
+        inline int ycbcr_to_rgb(int y, int cb, int cr) {
+            const double y_ = y;
+            const double cb_ = cb - 128;
+            const double cr_ = cr - 128;
+            const int r_ = (int)round(y_ + (1.402 * cr_));
+            const int g_ = (int)round(y_ - (0.344 * cb_) - (0.714 * cr_));
+            const int b_ = (int)round(y_ + (1.772 * cb_));
+            const int r = std::min(255, std::max(0, r_));
+            const int g = std::min(255, std::max(0, g_));
+            const int b = std::min(255, std::max(0, b_));
+            return (r << 16) | (g << 8) | b;
+        }
+
+        inline size_t find_nearest_color_y_cb_cr(int y, int cb, int cr, const int palette[], const size_t palette_size) {
+            y  = std::min(255, std::max(0, y));
+            cb = std::min(255, std::max(0, cb));
+            cr = std::min(255, std::max(0, cr));
+            size_t min_index = 0;
+            double min_score = INFINITY;
+            for(size_t i = 0; i < palette_size; ++i) {
+                const int p_color = palette[i];
+                const int p_y  = (p_color & 0xff0000) >> 16;
+                const int p_cb = (p_color & 0x00ff00) >>  8;
+                const int p_cr = (p_color & 0x0000ff);
+                //const double score = pow(pow(cb - p_cb, 2.) + pow(cr - p_cr, 2.) + pow(y - p_y, 2.), 1./3.);
+                const double d_cbcr = sqrt(pow(cb - p_cb, 2.) + pow(cr - p_cr, 2.));
+                const double score = sqrt(pow(y - p_y, 2.) + pow(d_cbcr, 2));
+                if(score < min_score) {
+                    min_index = i;
+                    min_score = score;
+                }
+            }
+            return min_index;
+        }
+
+        int famicom_convert(gd &img, const int palette[], const size_t palette_size, int used_count[]) {
+#           define FAMICOM_GOSA_KAKUSAN(dx, dy, rate, rate_total) do { \
+                const int tx = x + d * dx; \
+                const int ty = y + dy; \
+                if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
+                    gosa[tx][ty][0] += (int)round(gosa_y  * rate / rate_total); \
+                    gosa[tx][ty][1] += (int)round(gosa_cb * rate / rate_total); \
+                    gosa[tx][ty][2] += (int)round(gosa_cr * rate / rate_total); \
+                } \
+            } while(0)
+
+            img.alpha_blending(false);
+            const int width = img.width();
+            const int height = img.height();
+            boost::multi_array<int, 3> gosa(boost::extents[width][height][3]);
+            std::fill(gosa.origin(), gosa.origin() + gosa.size(), 0);
+
+            for(int y = 0; y < height; ++y) {
+                const int d = (y % 2 == 0) ? 1 : -1;
+                const int x_begin = (y % 2 == 0) ? 0 : width - 1;
+                const int x_end   = (y % 2 == 0) ? width : -1;
+                for(int x = x_begin; x != x_end; x += d) {
+                    const gd::color color = img.pixel_fast(x, y);
+                    const int r = (color & 0x00ff0000) >> 16;
+                    const int g = (color & 0x0000ff00) >> 8;
+                    const int b = (color & 0x000000ff);
+                    const int cy = rgb_to_y(r, g, b)  + gosa[x][y][0];
+                    const int cb = rgb_to_cb(r, g, b) + gosa[x][y][1];
+                    const int cr = rgb_to_cr(r, g, b) + gosa[x][y][2];
+                    const size_t index = find_nearest_color_y_cb_cr(cy, cb, cr, palette, palette_size);
+                    ++used_count[index];
+                    const int p_y  = (palette[index] & 0xff0000) >> 16;
+                    const int p_cb = (palette[index] & 0x00ff00) >>  8;
+                    const int p_cr = (palette[index] & 0x0000ff);
+                    img.pixel_fast(x, y, ycbcr_to_rgb(p_y, p_cb, p_cr));
+                    const int gosa_y  = cy - p_y;
+                    const int gosa_cb = cb - p_cb;
+                    const int gosa_cr = cr - p_cr;
+
+                    // Sierra 3line
+                    // - - X 5 3
+                    // 2 4 5 4 2
+                    // 0 2 3 2 0
+                    FAMICOM_GOSA_KAKUSAN( 1, 0, 5., 32.);
+                    FAMICOM_GOSA_KAKUSAN( 2, 0, 3., 32.);
+                    FAMICOM_GOSA_KAKUSAN(-2, 1, 2., 32.);
+                    FAMICOM_GOSA_KAKUSAN(-1, 1, 4., 32.);
+                    FAMICOM_GOSA_KAKUSAN( 0, 1, 5., 32.);
+                    FAMICOM_GOSA_KAKUSAN( 1, 1, 4., 32.);
+                    FAMICOM_GOSA_KAKUSAN( 2, 1, 2., 32.);
+                    FAMICOM_GOSA_KAKUSAN(-1, 2, 2., 32.);
+                    FAMICOM_GOSA_KAKUSAN( 0, 2, 3., 32.);
+                    FAMICOM_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                }
+            }
+            int count = 0;
+            for(size_t i = 0; i < palette_size; ++i) {
+                if(used_count[i] > 0) {
+                    ++count;
+                }
+            }
+            return count;
         }
     }
 
@@ -290,6 +405,65 @@ namespace manip {
         }
         return true;
 #undef WEBSAFE_GOSA_KAKUSAN
+    }
+
+    bool famicom(gd &img) {
+        const int fixed_palette_y_cb_cr[] = {
+            0x008080, 0x1bde71, 0x24fe6c, 0x32975e, 0x3462bc, 0x34635b, 0x346394, 0x3774d1,
+            0x3c5ecd, 0x3d5d54, 0x3fa9bf, 0x46584e, 0x47c582, 0x5185eb, 0x57df47, 0x5ec1db,
+            0x63483a, 0x63973c, 0x6ad43a, 0x6b43e5, 0x6bd683, 0x6c4333, 0x6c6a34, 0x7c3aa2,
+            0x7c43ca, 0x7c8080, 0x808080, 0x93bf67, 0x9485cb, 0x98ba86, 0x9d5ac3, 0xa5534b,
+            0xa5b53b, 0xa79f0d, 0xb342b5, 0xb4aab6, 0xb619af, 0xb8aa02, 0xc26b38, 0xc28080,
+            0xc680a8, 0xc7a07b, 0xcc1b72, 0xd09a8b, 0xda4a98, 0xda959b, 0xdb6a93, 0xdb975e,
+            0xe3457a, 0xe36b65, 0xe75f93, 0xe87b63, 0xed8a8d, 0xff8080, 
+        };
+        const size_t fixed_palette_count = sizeof(fixed_palette_y_cb_cr) / sizeof(fixed_palette_y_cb_cr[0]);
+
+        if(!fill_background(img, 0xffffff)) {
+            return false;
+        }
+        // それっぽさを出すために解像度を落とす
+        img.resize_fit((img.width() + 2) / 3, (img.height() + 2) / 3);
+
+        // 画像を破壊しないためにコピーを作る
+        gd img_tmp(img.width(), img.height());
+        img_tmp.alpha(false, true);
+        img_tmp.copy(img, 0, 0, 0, 0, img.width(), img.height());
+
+        // 1 パス目: とりあえず変換する
+        std::vector<int> palette_use_count(fixed_palette_count);
+        const int color_count = famicom_convert(img_tmp, fixed_palette_y_cb_cr, fixed_palette_count, &palette_use_count[0]);
+        if(color_count <= 25) {
+            // 1 パスで同時発色可能数に収まった
+            img.swap(img_tmp);
+        } else {
+            // 2 パス目: 25 色以内に抑える
+            
+            // 使われた回数が多い順に並び替える
+            std::vector<std::pair<size_t, int> > counts;
+            for(size_t i = 0; i < fixed_palette_count; ++i) {
+                counts.push_back(std::pair<size_t, int>(i, palette_use_count[i]));
+            }
+            std::sort(counts.begin(), counts.end(), boost::bind(&std::pair<size_t, int>::second, _1) > boost::bind(&std::pair<size_t, int>::second, _2));
+
+            // 多い方から 25 色取得する
+            int palette[25] = {};
+            {
+                size_t i;
+                std::vector<std::pair<size_t, int> >::iterator it;
+                for(i = 0, it = counts.begin(); i < 25; ++i, ++it) {
+                    palette[i] = fixed_palette_y_cb_cr[it->first];
+                }
+            }
+
+            palette_use_count.resize(25);
+            famicom_convert(img, palette, 25, &palette_use_count[0]);
+        }
+
+        // 解像度を下げたので元（とほとんど同じ）サイズに変更する
+        // GD の拡大が nearest neighbor なことに依存している
+        img.resize_fit(img.width() * 3, img.height() * 3);
+        return true;
     }
 
     bool negate(gd &img) {

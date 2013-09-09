@@ -79,6 +79,10 @@
         command: websafe
         option: なし
 
+    【ファミコン(NES)パレット】
+        command: famicom
+        option: なし
+
     【ネガ】
         command: nagate
         option: なし
