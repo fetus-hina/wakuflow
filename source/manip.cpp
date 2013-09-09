@@ -99,50 +99,44 @@ namespace manip {
         }
 
         inline int convert_to_websafe_color(int c) {
-            return c < 0
-                ? 0
-                : c > 255
-                    ? 255
-                    : ((int)round(c / 51.)) * 51;
+            return c < 0 ? 0 : c > 255 ? 255 : ((int)round(c / 51.)) * 51;
         }
 
-        inline int rgb_to_y(int r, int g, int b) {
-            return (int)round((0.299 * (double)r) + (0.587 * (double)g) + (0.114 * (double)b));
+        inline double rgb_to_y(int r, int g, int b) {
+            return (0.29900 * r) + (0.58700 * g) + (0.11400 * b);
         }
 
-        inline int rgb_to_cb(int r, int g, int b) {
-            return (int)round((-0.169 * (double)r) - (0.331 * (double)g) + (0.500 * (double)b) + 128.0);
+        inline double rgb_to_cb(int r, int g, int b) {
+            return (-0.16874 * r) - (0.33126 * g) + (0.50000 * b) + 128.;
         }
 
-        inline int rgb_to_cr(int r, int g, int b) {
-            return (int)round((0.500 * (double)r) - (0.419 * (double)g) - (0.081 * (double)b) + 128.0);
+        inline double rgb_to_cr(int r, int g, int b) {
+            return (0.50000 * r) - (0.41869 * g) - (0.08131 * b) + 128.;
         }
 
-        inline int ycbcr_to_rgb(int y, int cb, int cr) {
-            const double y_ = y;
-            const double cb_ = cb - 128;
-            const double cr_ = cr - 128;
-            const int r_ = (int)round(y_ + (1.402 * cr_));
-            const int g_ = (int)round(y_ - (0.344 * cb_) - (0.714 * cr_));
-            const int b_ = (int)round(y_ + (1.772 * cb_));
-            const int r = std::min(255, std::max(0, r_));
-            const int g = std::min(255, std::max(0, g_));
-            const int b = std::min(255, std::max(0, b_));
+        inline int ycbcr_to_rgb(double y, double cb, double cr) {
+            cb -= 128.;
+            cr -= 128.;
+            const double r_ = y                  + (1.40200 * cr);
+            const double g_ = y - (0.34414 * cb) - (0.71414 * cr);
+            const double b_ = y + (1.77200 * cb);
+            const int r = static_cast<int>(r_ < 0.5 ? 0 : r_ >= 254.5 ? 255.0 : (r_ + 0.5));
+            const int g = static_cast<int>(g_ < 0.5 ? 0 : g_ >= 254.5 ? 255.0 : (g_ + 0.5));
+            const int b = static_cast<int>(b_ < 0.5 ? 0 : b_ >= 254.5 ? 255.0 : (b_ + 0.5));
             return (r << 16) | (g << 8) | b;
         }
 
-        inline size_t find_nearest_color_y_cb_cr(int y, int cb, int cr, const int palette[], const size_t palette_size) {
-            y  = std::min(255, std::max(0, y));
-            cb = std::min(255, std::max(0, cb));
-            cr = std::min(255, std::max(0, cr));
+        inline size_t find_nearest_color_y_cb_cr(double y, double cb, double cr, const int palette[], const size_t palette_size) {
+            y  = y  < 0.0 ? 0.0 : y  > 255.0 ? 255.0 : y;
+            cb = cb < 0.0 ? 0.0 : cb > 255.0 ? 255.0 : cb;
+            cr = cr < 0.0 ? 0.0 : cr > 255.0 ? 255.0 : cr;
             size_t min_index = 0;
             double min_score = INFINITY;
             for(size_t i = 0; i < palette_size; ++i) {
                 const int p_color = palette[i];
-                const int p_y  = (p_color & 0xff0000) >> 16;
-                const int p_cb = (p_color & 0x00ff00) >>  8;
-                const int p_cr = (p_color & 0x0000ff);
-                //const double score = pow(pow(cb - p_cb, 2.) + pow(cr - p_cr, 2.) + pow(y - p_y, 2.), 1./3.);
+                const double p_y  = (double)((p_color & 0xff0000) >> 16);
+                const double p_cb = (double)((p_color & 0x00ff00) >>  8);
+                const double p_cr = (double)((p_color & 0x0000ff)      );
                 const double d_cbcr = sqrt(pow(cb - p_cb, 2.) + pow(cr - p_cr, 2.));
                 const double score = sqrt(pow(y - p_y, 2.) + pow(d_cbcr, 2));
                 if(score < min_score) {
@@ -158,16 +152,16 @@ namespace manip {
                 const int tx = x + d * dx; \
                 const int ty = y + dy; \
                 if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
-                    gosa[tx][ty][0] += (int)round(gosa_y  * rate / rate_total); \
-                    gosa[tx][ty][1] += (int)round(gosa_cb * rate / rate_total); \
-                    gosa[tx][ty][2] += (int)round(gosa_cr * rate / rate_total); \
+                    gosa[tx][ty][0] += gosa_y  * rate / rate_total; \
+                    gosa[tx][ty][1] += gosa_cb * rate / rate_total; \
+                    gosa[tx][ty][2] += gosa_cr * rate / rate_total; \
                 } \
             } while(0)
 
             img.alpha_blending(false);
             const int width = img.width();
             const int height = img.height();
-            boost::multi_array<int, 3> gosa(boost::extents[width][height][3]);
+            boost::multi_array<double, 3> gosa(boost::extents[width][height][3]);
             std::fill(gosa.origin(), gosa.origin() + gosa.size(), 0);
 
             for(int y = 0; y < height; ++y) {
@@ -179,18 +173,18 @@ namespace manip {
                     const int r = (color & 0x00ff0000) >> 16;
                     const int g = (color & 0x0000ff00) >> 8;
                     const int b = (color & 0x000000ff);
-                    const int cy = rgb_to_y(r, g, b)  + gosa[x][y][0];
-                    const int cb = rgb_to_cb(r, g, b) + gosa[x][y][1];
-                    const int cr = rgb_to_cr(r, g, b) + gosa[x][y][2];
+                    const double cy = rgb_to_y(r, g, b)  + gosa[x][y][0];
+                    const double cb = rgb_to_cb(r, g, b) + gosa[x][y][1];
+                    const double cr = rgb_to_cr(r, g, b) + gosa[x][y][2];
                     const size_t index = find_nearest_color_y_cb_cr(cy, cb, cr, palette, palette_size);
                     ++used_count[index];
                     const int p_y  = (palette[index] & 0xff0000) >> 16;
                     const int p_cb = (palette[index] & 0x00ff00) >>  8;
                     const int p_cr = (palette[index] & 0x0000ff);
                     img.pixel_fast(x, y, ycbcr_to_rgb(p_y, p_cb, p_cr));
-                    const int gosa_y  = cy - p_y;
-                    const int gosa_cb = cb - p_cb;
-                    const int gosa_cr = cr - p_cr;
+                    const double gosa_y  = cy - p_y;
+                    const double gosa_cb = cb - p_cb;
+                    const double gosa_cr = cr - p_cr;
 
                     // Sierra 3line
                     // - - X 5 3
