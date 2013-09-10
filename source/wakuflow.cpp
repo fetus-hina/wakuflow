@@ -83,6 +83,16 @@ namespace {
         }
     }
 
+    manip::DITHERING_METHOD dithering_method(const std::string &value, manip::DITHERING_METHOD def = manip::DITHERING_NONE) {
+        if(value == "none")             { return manip::DITHERING_NONE; }
+        else if(value == "floyd")       { return manip::DITHERING_FLOYD_STEINBERG; }
+        else if(value == "sierra3")     { return manip::DITHERING_SIERRA_3LINE; }
+        else if(value == "sierra2")     { return manip::DITHERING_SIERRA_2LINE; }
+        else if(value == "sierra-lite") { return manip::DITHERING_SIERRA_LITE; }
+        else if(value == "atkinson")    { return manip::DITHERING_ATKINSON; }
+        std::cerr << "不明なディザリングメソッド: " << value << std::endl;
+        return def;
+    }
 
     bool execute_command(gd &image, const std::string &command, const std::vector<std::string> &options) {
         if(command == "waku1") {
@@ -122,19 +132,10 @@ namespace {
         } else if(command == "8colors") {
             return manip::binarize(image, false);
         } else if(command == "websafe") {
-            return manip::websafe(image);
+            const manip::DITHERING_METHOD method = (options.size() >= 1) ? dithering_method(options[0], manip::DITHERING_NONE) : manip::DITHERING_NONE;
+            return manip::websafe(image, method);
         } else if(command == "famicom") {
-            manip::DITHERING_METHOD method = manip::DITHERING_NONE;
-            if(options.size() >= 1) {
-                const std::string m = options[0];
-                if(m == "none")             { method = manip::DITHERING_NONE; }
-                else if(m == "floyd")       { method = manip::DITHERING_FLOYD_STEINBERG; }
-                else if(m == "sierra3")     { method = manip::DITHERING_SIERRA_3LINE; }
-                else if(m == "sierra2")     { method = manip::DITHERING_SIERRA_2LINE; }
-                else if(m == "sierra-lite") { method = manip::DITHERING_SIERRA_LITE; }
-                else if(m == "atkinson")    { method = manip::DITHERING_ATKINSON; }
-                else { std::cerr << "不明なディザリングメソッド: " << m << std::endl; }
-            }
+            const manip::DITHERING_METHOD method = (options.size() >= 1) ? dithering_method(options[0], manip::DITHERING_NONE) : manip::DITHERING_NONE;
             return manip::famicom(image, method);
         } else if(command == "negate") {
             return manip::negate(image);

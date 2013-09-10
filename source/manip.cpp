@@ -386,7 +386,7 @@ namespace manip {
         return true;
     }
 
-    bool websafe(gd &img) {
+    bool websafe(gd &img, DITHERING_METHOD dither) {
 #       define WEBSAFE_GOSA_KAKUSAN(dx, dy, rate, rate_total) do { \
             const int tx = x + d * dx; \
             const int ty = y + dy; \
@@ -421,20 +421,63 @@ namespace manip {
                     const double gosa_r = r - static_cast<double>(web_r);
                     const double gosa_g = g - static_cast<double>(web_g);
                     const double gosa_b = b - static_cast<double>(web_b);
-                    // Sierra 3line
-                    // - - X 5 3
-                    // 2 4 5 4 2
-                    // 0 2 3 2 0
-                    WEBSAFE_GOSA_KAKUSAN( 1, 0, 5., 32.);
-                    WEBSAFE_GOSA_KAKUSAN( 2, 0, 3., 32.);
-                    WEBSAFE_GOSA_KAKUSAN(-2, 1, 2., 32.);
-                    WEBSAFE_GOSA_KAKUSAN(-1, 1, 4., 32.);
-                    WEBSAFE_GOSA_KAKUSAN( 0, 1, 5., 32.);
-                    WEBSAFE_GOSA_KAKUSAN( 1, 1, 4., 32.);
-                    WEBSAFE_GOSA_KAKUSAN( 2, 1, 2., 32.);
-                    WEBSAFE_GOSA_KAKUSAN(-1, 2, 2., 32.);
-                    WEBSAFE_GOSA_KAKUSAN( 0, 2, 3., 32.);
-                    WEBSAFE_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                    switch(dither) {
+                    case DITHERING_NONE:
+                    default:
+                        break;
+                    case DITHERING_FLOYD_STEINBERG:
+                        // - X 7
+                        // 3 5 1
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 7., 16.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 0, 3., 16.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 0, 5., 16.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 1., 16.);
+                        break;
+                    case DITHERING_SIERRA_3LINE:
+                        // - - X 5 3
+                        // 2 4 5 4 2
+                        // 0 2 3 2 0
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 5., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 3., 32.);
+                        WEBSAFE_GOSA_KAKUSAN(-2, 1, 2., 32.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 4., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 5., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 4., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 1, 2., 32.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 2, 2., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 2, 3., 32.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                        break;
+                    case DITHERING_SIERRA_2LINE:
+                        // - - X 4 3
+                        // 1 2 3 2 1
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 4., 16.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 3., 16.);
+                        WEBSAFE_GOSA_KAKUSAN(-2, 1, 1., 16.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 2., 16.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 3., 16.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 2., 16.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 1, 1., 16.);
+                        break;
+                    case DITHERING_SIERRA_LITE:
+                        // - X 2
+                        // 1 1 0
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 2., 4.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 1., 4.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 1., 4.);
+                        break;
+                    case DITHERING_ATKINSON:
+                        // - - X 1 1
+                        // 0 1 1 1 0
+                        // 0 0 1 0 0 ※合計6だが8で割る(75%拡散)
+                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 1., 8.);
+                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 1., 8.);
+                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 1., 8.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 1., 8.);
+                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 1., 8.);
+                        WEBSAFE_GOSA_KAKUSAN( 0, 2, 1., 8.);
+                        break;
+                    }
                 }
                 img.pixel_fast(x, y, a | (web_r << 16) | (web_g << 8) | web_b);
             }

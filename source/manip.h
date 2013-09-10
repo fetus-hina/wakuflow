@@ -15,7 +15,7 @@ namespace manip {
     bool grayscale(gd &);
     bool colorize(gd &, int r, int g, int b, int a);
     bool binarize(gd &, bool is_grayscaled);
-    bool websafe(gd &);
+    bool websafe(gd &, DITHERING_METHOD m);
     bool famicom(gd &, DITHERING_METHOD m);
     bool negate(gd &);
     bool pixelate(gd &, int);

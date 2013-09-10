@@ -77,17 +77,11 @@
 
     【ウェブセーフカラー】
         command: websafe
-        option: なし
+        option1: ディザリング方法(省略可:省略時none)
 
     【ファミコン(NES)パレット】
         command: famicom
-        option1: ディザリング方法(省略可)
-            - none          ディザリングなし
-            - floyd         Floyd-Steinberg
-            - sierra3       Sierra (3 line)
-            - sierra2       Sierra (2 line)
-            - sierra-lite   Sierra Lite
-            - atkinson      Atkinson
+        option1: ディザリング方法(省略可:省略時none)
 
     【ネガ】
         command: nagate
@@ -124,3 +118,11 @@
     【反転】
         command: flip
         option1: vertical | horizontal
+
+《ディザリング方法》
+    * none        : ディザリングなし
+    * floyd       : Floyd-Steinberg
+    * sierra3     : Sierra (3 line)
+    * sierra2     : Sierra (2 line)
+    * sierra-lite : Sierra Lite
+    * atkinson    : Atkinson
