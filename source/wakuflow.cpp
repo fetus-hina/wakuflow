@@ -128,9 +128,13 @@ namespace {
         } else if(command == "sepia") {
             return manip::grayscale(image) && manip::colorize(image, 100, 50, 0, 0);
         } else if(command == "binarize") {
-            return manip::grayscale(image) && manip::binarize(image, true);
+            const manip::THRESHOLDING threshold = (options.size() >= 1 && options[0] == "half") ? manip::THRESHOLD_HALF : manip::THRESHOLD_OTSU;
+            const manip::DITHERING_METHOD method = (options.size() >= 2) ? dithering_method(options[1], manip::DITHERING_NONE) : manip::DITHERING_NONE;
+            return manip::grayscale(image) && manip::binarize(image, true, threshold, method);
         } else if(command == "8colors") {
-            return manip::binarize(image, false);
+            const manip::THRESHOLDING threshold = (options.size() >= 1 && options[0] == "half") ? manip::THRESHOLD_HALF : manip::THRESHOLD_OTSU;
+            const manip::DITHERING_METHOD method = (options.size() >= 2) ? dithering_method(options[1], manip::DITHERING_NONE) : manip::DITHERING_NONE;
+            return manip::binarize(image, false, threshold, method);
         } else if(command == "websafe") {
             const manip::DITHERING_METHOD method = (options.size() >= 1) ? dithering_method(options[0], manip::DITHERING_NONE) : manip::DITHERING_NONE;
             return manip::websafe(image, method);

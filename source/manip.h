@@ -11,10 +11,14 @@ namespace manip {
         DITHERING_SIERRA_LITE,
         DITHERING_ATKINSON,
     };
+    enum THRESHOLDING {
+        THRESHOLD_HALF,
+        THRESHOLD_OTSU,
+    };
 
     bool grayscale(gd &);
     bool colorize(gd &, int r, int g, int b, int a);
-    bool binarize(gd &, bool is_grayscaled);
+    bool binarize(gd &, bool is_grayscaled, THRESHOLDING, DITHERING_METHOD);
     bool websafe(gd &, DITHERING_METHOD m);
     bool famicom(gd &, DITHERING_METHOD m);
     bool negate(gd &);

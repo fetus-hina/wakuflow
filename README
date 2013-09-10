@@ -69,11 +69,17 @@
 
     【二色化】
         command: binarize
-        option: なし
+        option1: 閾値計算方法
+                    half: 中間(=128)を閾値とする
+                    otsu: 大津の手法で適切な値を計算する(デフォルト)
+        option2: ディザリング方法(省略時:none)
 
     【八色化】
         command: 8colors
-        option: なし
+        option1: 閾値計算方法
+                    half: 中間(=128)を閾値とする
+                    otsu: 大津の手法で適切な値を計算する(デフォルト)
+        option2: ディザリング方法(省略時:none)
 
     【ウェブセーフカラー】
         command: websafe

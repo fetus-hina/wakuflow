@@ -10,6 +10,26 @@
 #include "gd.h"
 #include "../image/image.h"
 
+#define GOSA_KAKUSAN_YCBCR(dx, dy, rate, rate_total) do { \
+        const int tx = x + d * dx; \
+        const int ty = y + dy; \
+        if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
+            gosa[tx][ty][0] += gosa_y  * rate / rate_total; \
+            gosa[tx][ty][1] += gosa_cb * rate / rate_total; \
+            gosa[tx][ty][2] += gosa_cr * rate / rate_total; \
+        } \
+    } while(0)
+
+#define GOSA_KAKUSAN_RGB(dx, dy, rate, rate_total) do { \
+        const int tx = x + d * dx; \
+        const int ty = y + dy; \
+        if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
+            gosa[tx][ty][0] += gosa_r * rate / rate_total; \
+            gosa[tx][ty][1] += gosa_g * rate / rate_total; \
+            gosa[tx][ty][2] += gosa_b * rate / rate_total; \
+        } \
+    } while(0)
+
 namespace manip {
     namespace {
         // 大津の手法による閾値の計算
@@ -148,16 +168,6 @@ namespace manip {
         }
 
         int famicom_convert(gd &img, DITHERING_METHOD dither, const int palette[], const size_t palette_size, int used_count[]) {
-#           define FAMICOM_GOSA_KAKUSAN(dx, dy, rate, rate_total) do { \
-                const int tx = x + d * dx; \
-                const int ty = y + dy; \
-                if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
-                    gosa[tx][ty][0] += gosa_y  * rate / rate_total; \
-                    gosa[tx][ty][1] += gosa_cb * rate / rate_total; \
-                    gosa[tx][ty][2] += gosa_cr * rate / rate_total; \
-                } \
-            } while(0)
-
             img.alpha_blending(false);
             const int width = img.width();
             const int height = img.height();
@@ -193,54 +203,54 @@ namespace manip {
                     case DITHERING_FLOYD_STEINBERG:
                         // - X 7
                         // 3 5 1
-                        FAMICOM_GOSA_KAKUSAN( 1, 0, 7., 16.);
-                        FAMICOM_GOSA_KAKUSAN(-1, 0, 3., 16.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 0, 5., 16.);
-                        FAMICOM_GOSA_KAKUSAN( 1, 0, 1., 16.);
+                        GOSA_KAKUSAN_YCBCR( 1, 0, 7., 16.);
+                        GOSA_KAKUSAN_YCBCR(-1, 0, 3., 16.);
+                        GOSA_KAKUSAN_YCBCR( 0, 0, 5., 16.);
+                        GOSA_KAKUSAN_YCBCR( 1, 0, 1., 16.);
                         break;
                     case DITHERING_SIERRA_3LINE:
                         // - - X 5 3
                         // 2 4 5 4 2
                         // 0 2 3 2 0
-                        FAMICOM_GOSA_KAKUSAN( 1, 0, 5., 32.);
-                        FAMICOM_GOSA_KAKUSAN( 2, 0, 3., 32.);
-                        FAMICOM_GOSA_KAKUSAN(-2, 1, 2., 32.);
-                        FAMICOM_GOSA_KAKUSAN(-1, 1, 4., 32.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 1, 5., 32.);
-                        FAMICOM_GOSA_KAKUSAN( 1, 1, 4., 32.);
-                        FAMICOM_GOSA_KAKUSAN( 2, 1, 2., 32.);
-                        FAMICOM_GOSA_KAKUSAN(-1, 2, 2., 32.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 2, 3., 32.);
-                        FAMICOM_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                        GOSA_KAKUSAN_YCBCR( 1, 0, 5., 32.);
+                        GOSA_KAKUSAN_YCBCR( 2, 0, 3., 32.);
+                        GOSA_KAKUSAN_YCBCR(-2, 1, 2., 32.);
+                        GOSA_KAKUSAN_YCBCR(-1, 1, 4., 32.);
+                        GOSA_KAKUSAN_YCBCR( 0, 1, 5., 32.);
+                        GOSA_KAKUSAN_YCBCR( 1, 1, 4., 32.);
+                        GOSA_KAKUSAN_YCBCR( 2, 1, 2., 32.);
+                        GOSA_KAKUSAN_YCBCR(-1, 2, 2., 32.);
+                        GOSA_KAKUSAN_YCBCR( 0, 2, 3., 32.);
+                        GOSA_KAKUSAN_YCBCR( 1, 2, 2., 32.);
                         break;
                     case DITHERING_SIERRA_2LINE:
                         // - - X 4 3
                         // 1 2 3 2 1
-                        FAMICOM_GOSA_KAKUSAN( 1, 0, 4., 16.);
-                        FAMICOM_GOSA_KAKUSAN( 2, 0, 3., 16.);
-                        FAMICOM_GOSA_KAKUSAN(-2, 1, 1., 16.);
-                        FAMICOM_GOSA_KAKUSAN(-1, 1, 2., 16.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 1, 3., 16.);
-                        FAMICOM_GOSA_KAKUSAN( 1, 1, 2., 16.);
-                        FAMICOM_GOSA_KAKUSAN( 2, 1, 1., 16.);
+                        GOSA_KAKUSAN_YCBCR( 1, 0, 4., 16.);
+                        GOSA_KAKUSAN_YCBCR( 2, 0, 3., 16.);
+                        GOSA_KAKUSAN_YCBCR(-2, 1, 1., 16.);
+                        GOSA_KAKUSAN_YCBCR(-1, 1, 2., 16.);
+                        GOSA_KAKUSAN_YCBCR( 0, 1, 3., 16.);
+                        GOSA_KAKUSAN_YCBCR( 1, 1, 2., 16.);
+                        GOSA_KAKUSAN_YCBCR( 2, 1, 1., 16.);
                         break;
                     case DITHERING_SIERRA_LITE:
                         // - X 2
                         // 1 1 0
-                        FAMICOM_GOSA_KAKUSAN( 1, 0, 2., 4.);
-                        FAMICOM_GOSA_KAKUSAN(-1, 1, 1., 4.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 1, 1., 4.);
+                        GOSA_KAKUSAN_YCBCR( 1, 0, 2., 4.);
+                        GOSA_KAKUSAN_YCBCR(-1, 1, 1., 4.);
+                        GOSA_KAKUSAN_YCBCR( 0, 1, 1., 4.);
                         break;
                     case DITHERING_ATKINSON:
                         // - - X 1 1
                         // 0 1 1 1 0
                         // 0 0 1 0 0 ※合計6だが8で割る(75%拡散)
-                        FAMICOM_GOSA_KAKUSAN( 1, 0, 1., 8.);
-                        FAMICOM_GOSA_KAKUSAN( 2, 0, 1., 8.);
-                        FAMICOM_GOSA_KAKUSAN(-1, 1, 1., 8.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 1, 1., 8.);
-                        FAMICOM_GOSA_KAKUSAN( 1, 1, 1., 8.);
-                        FAMICOM_GOSA_KAKUSAN( 0, 2, 1., 8.);
+                        GOSA_KAKUSAN_YCBCR( 1, 0, 1., 8.);
+                        GOSA_KAKUSAN_YCBCR( 2, 0, 1., 8.);
+                        GOSA_KAKUSAN_YCBCR(-1, 1, 1., 8.);
+                        GOSA_KAKUSAN_YCBCR( 0, 1, 1., 8.);
+                        GOSA_KAKUSAN_YCBCR( 1, 1, 1., 8.);
+                        GOSA_KAKUSAN_YCBCR( 0, 2, 1., 8.);
                         break;
                     }
                 }
@@ -253,7 +263,6 @@ namespace manip {
             }
             return count;
         }
-#undef FAMICOM_GOSA_KAKUSAN
     }
 
     bool fill_background(gd &img, gd::color bg) {
@@ -326,7 +335,7 @@ namespace manip {
         return true;
     }
 
-    bool binarize(gd &img, bool is_grayscaled) {
+    bool binarize(gd &img, bool is_grayscaled, THRESHOLDING thresholding, DITHERING_METHOD dithering) {
         img.convert_to_true_color();
         img.alpha_blending(false);
         int hist_r[256] = {};
@@ -368,35 +377,95 @@ namespace manip {
             return true;
         }
 
-        // 大津の手法により閾値を計算
-        const int otsu_threshold_r = otsu_threshold((double)total_r / (double)pixel_count, hist_r);
-        const int otsu_threshold_g = is_grayscaled ? otsu_threshold_r : otsu_threshold((double)total_g / (double)pixel_count, hist_g);
-        const int otsu_threshold_b = is_grayscaled ? otsu_threshold_r : otsu_threshold((double)total_b / (double)pixel_count, hist_b);
+        boost::multi_array<double, 3> gosa(boost::extents[width][height][3]);
+        std::fill(gosa.origin(), gosa.origin() + gosa.size(), 0);
 
+        // 閾値を計算
+        const int threshold_r = (thresholding == THRESHOLD_HALF) ? 128 : otsu_threshold((double)total_r / (double)pixel_count, hist_r);
+        const int threshold_g = is_grayscaled ? threshold_r : (thresholding == THRESHOLD_HALF) ? 128 : otsu_threshold((double)total_g / (double)pixel_count, hist_g);
+        const int threshold_b = is_grayscaled ? threshold_r : (thresholding == THRESHOLD_HALF) ? 128 : otsu_threshold((double)total_b / (double)pixel_count, hist_b);
         for(int y = 0; y < height; ++y) {
-            for(int x = 0; x < width; ++x) {
+            const int d = (y % 2 == 0) ? 1 : -1;
+            const int x_begin = (y % 2 == 0) ? 0 : width - 1;
+            const int x_end   = (y % 2 == 0) ? width : -1;
+            for(int x = x_begin; x != x_end; x += d) {
                 const gd::color color = img.pixel_fast(x, y);
                 const int a = (color & 0x7f000000);
-                const int r = ((color & 0x00ff0000) >> 16) <= otsu_threshold_r ? 0x00 : 0xff;
-                const int g = ((color & 0x0000ff00) >> 8)  <= otsu_threshold_g ? 0x00 : 0xff;
-                const int b = ((color & 0x000000ff))       <= otsu_threshold_b ? 0x00 : 0xff;
-                img.pixel_fast(x, y, a | (r << 16) | (g << 8) | b);
+                const double r = static_cast<double>((color & 0xff0000) >> 16) + gosa[x][y][0];
+                const double g = static_cast<double>((color & 0x00ff00) >>  8) + gosa[x][y][1];
+                const double b = static_cast<double>((color & 0x0000ff)      ) + gosa[x][y][2];
+                const int put_r = (r < threshold_r) ? 0x00 : 0xff;
+                const int put_g = (g < threshold_g) ? 0x00 : 0xff;
+                const int put_b = (b < threshold_b) ? 0x00 : 0xff;
+                img.pixel_fast(x, y, a | (put_r << 16) | (put_g << 8) | put_b);
+                if(a < 0x7f000000) {
+                    const double gosa_r = r - static_cast<double>(put_r);
+                    const double gosa_g = g - static_cast<double>(put_g);
+                    const double gosa_b = b - static_cast<double>(put_b);
+                    switch(dithering) {
+                    case DITHERING_NONE:
+                    default:
+                        break;
+                    case DITHERING_FLOYD_STEINBERG:
+                        // - X 7
+                        // 3 5 1
+                        GOSA_KAKUSAN_RGB( 1, 0, 7., 16.);
+                        GOSA_KAKUSAN_RGB(-1, 0, 3., 16.);
+                        GOSA_KAKUSAN_RGB( 0, 0, 5., 16.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 1., 16.);
+                        break;
+                    case DITHERING_SIERRA_3LINE:
+                        // - - X 5 3
+                        // 2 4 5 4 2
+                        // 0 2 3 2 0
+                        GOSA_KAKUSAN_RGB( 1, 0, 5., 32.);
+                        GOSA_KAKUSAN_RGB( 2, 0, 3., 32.);
+                        GOSA_KAKUSAN_RGB(-2, 1, 2., 32.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 4., 32.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 5., 32.);
+                        GOSA_KAKUSAN_RGB( 1, 1, 4., 32.);
+                        GOSA_KAKUSAN_RGB( 2, 1, 2., 32.);
+                        GOSA_KAKUSAN_RGB(-1, 2, 2., 32.);
+                        GOSA_KAKUSAN_RGB( 0, 2, 3., 32.);
+                        GOSA_KAKUSAN_RGB( 1, 2, 2., 32.);
+                        break;
+                    case DITHERING_SIERRA_2LINE:
+                        // - - X 4 3
+                        // 1 2 3 2 1
+                        GOSA_KAKUSAN_RGB( 1, 0, 4., 16.);
+                        GOSA_KAKUSAN_RGB( 2, 0, 3., 16.);
+                        GOSA_KAKUSAN_RGB(-2, 1, 1., 16.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 2., 16.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 3., 16.);
+                        GOSA_KAKUSAN_RGB( 1, 1, 2., 16.);
+                        GOSA_KAKUSAN_RGB( 2, 1, 1., 16.);
+                        break;
+                    case DITHERING_SIERRA_LITE:
+                        // - X 2
+                        // 1 1 0
+                        GOSA_KAKUSAN_RGB( 1, 0, 2., 4.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 1., 4.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 1., 4.);
+                        break;
+                    case DITHERING_ATKINSON:
+                        // - - X 1 1
+                        // 0 1 1 1 0
+                        // 0 0 1 0 0 ※合計6だが8で割る(75%拡散)
+                        GOSA_KAKUSAN_RGB( 1, 0, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 2, 0, 1., 8.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 1, 1, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 0, 2, 1., 8.);
+                        break;
+                    }
+                }
             }
         }
         return true;
     }
 
     bool websafe(gd &img, DITHERING_METHOD dither) {
-#       define WEBSAFE_GOSA_KAKUSAN(dx, dy, rate, rate_total) do { \
-            const int tx = x + d * dx; \
-            const int ty = y + dy; \
-            if(0 <= tx && tx < width && 0 <= ty && ty < height) { \
-                gosa[tx][ty][0] += gosa_r * rate / rate_total; \
-                gosa[tx][ty][1] += gosa_g * rate / rate_total; \
-                gosa[tx][ty][2] += gosa_b * rate / rate_total; \
-            } \
-        } while(0)
-
         img.convert_to_true_color();
         img.alpha_blending(false);
         const int width = img.width();
@@ -428,54 +497,54 @@ namespace manip {
                     case DITHERING_FLOYD_STEINBERG:
                         // - X 7
                         // 3 5 1
-                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 7., 16.);
-                        WEBSAFE_GOSA_KAKUSAN(-1, 0, 3., 16.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 0, 5., 16.);
-                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 1., 16.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 7., 16.);
+                        GOSA_KAKUSAN_RGB(-1, 0, 3., 16.);
+                        GOSA_KAKUSAN_RGB( 0, 0, 5., 16.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 1., 16.);
                         break;
                     case DITHERING_SIERRA_3LINE:
                         // - - X 5 3
                         // 2 4 5 4 2
                         // 0 2 3 2 0
-                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 5., 32.);
-                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 3., 32.);
-                        WEBSAFE_GOSA_KAKUSAN(-2, 1, 2., 32.);
-                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 4., 32.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 5., 32.);
-                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 4., 32.);
-                        WEBSAFE_GOSA_KAKUSAN( 2, 1, 2., 32.);
-                        WEBSAFE_GOSA_KAKUSAN(-1, 2, 2., 32.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 2, 3., 32.);
-                        WEBSAFE_GOSA_KAKUSAN( 1, 2, 2., 32.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 5., 32.);
+                        GOSA_KAKUSAN_RGB( 2, 0, 3., 32.);
+                        GOSA_KAKUSAN_RGB(-2, 1, 2., 32.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 4., 32.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 5., 32.);
+                        GOSA_KAKUSAN_RGB( 1, 1, 4., 32.);
+                        GOSA_KAKUSAN_RGB( 2, 1, 2., 32.);
+                        GOSA_KAKUSAN_RGB(-1, 2, 2., 32.);
+                        GOSA_KAKUSAN_RGB( 0, 2, 3., 32.);
+                        GOSA_KAKUSAN_RGB( 1, 2, 2., 32.);
                         break;
                     case DITHERING_SIERRA_2LINE:
                         // - - X 4 3
                         // 1 2 3 2 1
-                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 4., 16.);
-                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 3., 16.);
-                        WEBSAFE_GOSA_KAKUSAN(-2, 1, 1., 16.);
-                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 2., 16.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 3., 16.);
-                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 2., 16.);
-                        WEBSAFE_GOSA_KAKUSAN( 2, 1, 1., 16.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 4., 16.);
+                        GOSA_KAKUSAN_RGB( 2, 0, 3., 16.);
+                        GOSA_KAKUSAN_RGB(-2, 1, 1., 16.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 2., 16.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 3., 16.);
+                        GOSA_KAKUSAN_RGB( 1, 1, 2., 16.);
+                        GOSA_KAKUSAN_RGB( 2, 1, 1., 16.);
                         break;
                     case DITHERING_SIERRA_LITE:
                         // - X 2
                         // 1 1 0
-                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 2., 4.);
-                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 1., 4.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 1., 4.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 2., 4.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 1., 4.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 1., 4.);
                         break;
                     case DITHERING_ATKINSON:
                         // - - X 1 1
                         // 0 1 1 1 0
                         // 0 0 1 0 0 ※合計6だが8で割る(75%拡散)
-                        WEBSAFE_GOSA_KAKUSAN( 1, 0, 1., 8.);
-                        WEBSAFE_GOSA_KAKUSAN( 2, 0, 1., 8.);
-                        WEBSAFE_GOSA_KAKUSAN(-1, 1, 1., 8.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 1, 1., 8.);
-                        WEBSAFE_GOSA_KAKUSAN( 1, 1, 1., 8.);
-                        WEBSAFE_GOSA_KAKUSAN( 0, 2, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 1, 0, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 2, 0, 1., 8.);
+                        GOSA_KAKUSAN_RGB(-1, 1, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 0, 1, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 1, 1, 1., 8.);
+                        GOSA_KAKUSAN_RGB( 0, 2, 1., 8.);
                         break;
                     }
                 }
@@ -483,7 +552,6 @@ namespace manip {
             }
         }
         return true;
-#undef WEBSAFE_GOSA_KAKUSAN
     }
 
     bool famicom(gd &img, DITHERING_METHOD dither) {
