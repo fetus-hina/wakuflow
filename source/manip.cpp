@@ -118,6 +118,65 @@ namespace manip {
             return true;
         }
 
+        bool fill_background(gd &img, gd::color bg) {
+            const int bg_r = (bg & 0xff0000) >> 16;
+            const int bg_g = (bg & 0x00ff00) >>  8;
+            const int bg_b = (bg & 0x0000ff);
+            img.convert_to_true_color();
+            img.alpha_blending(false);
+            const int width = img.width();
+            const int height = img.height();
+            for(int y = 0; y < height; ++y) {
+                for(int x = 0; x < width; ++x) {
+                    const gd::color color = img.pixel_fast(x, y);
+                    const int a = (color & 0x7f000000) >> 24;
+                    if(a == 0) {
+                        continue;
+                    }
+                    const double alpha = static_cast<double>(127 - a) / 127.0;
+                    const int org_r = (color & 0xff0000) >> 16;
+                    const int org_g = (color & 0x00ff00) >>  8;
+                    const int org_b = (color & 0x0000ff);
+                    const int r = static_cast<int>(org_r * alpha + bg_r * (1.0 - alpha) + 0.5);
+                    const int g = static_cast<int>(org_g * alpha + bg_g * (1.0 - alpha) + 0.5);
+                    const int b = static_cast<int>(org_b * alpha + bg_b * (1.0 - alpha) + 0.5);
+                    img.pixel_fast(x, y, (r << 16) | (g << 8) | b);
+                }
+            }
+            return true;
+        }
+
+        bool do_grayscale(gd &img, int black = 0, int white = 255, gd::color background = 0x7fffffff) {
+            img.convert_to_true_color();
+            img.alpha_blending(false);
+            if((background & 0x7f000000) != 0x7f000000) {
+                if(!fill_background(img, background)) {
+                    return false;
+                }
+            }
+            const int width = img.width();
+            const int height = img.height();
+            const double range = white - black;
+            for(int y = 0; y < height; ++y) {
+                for(int x = 0; x < width; ++x) {
+                    const gd::color color = img.pixel_fast(x, y);
+                    const int r = (color & 0xff0000) >> 16;
+                    const int g = (color & 0x00ff00) >>  8;
+                    const int b = (color & 0x0000ff);
+                    const int a = (color & 0x7f000000); // そのまま使うのでビットシフトしない
+                    const double gray = (r * 0.298912) + (g * 0.586611) + (b * 0.114478);
+                    const int put =
+                        (gray <= black)
+                            ? 0
+                            : (gray >= white)
+                                ? 255
+                                : std::min(255, std::max(0, static_cast<int>((gray - black) * 255. / range + 0.5)));
+                    img.pixel_fast(x, y, a | (put * 0x010101));
+                }
+            }
+            return true;
+        }
+
         inline int convert_to_websafe_color(int c) {
             return c < 0 ? 0 : c > 255 ? 255 : ((int)round(c / 51.)) * 51;
         }
@@ -265,51 +324,8 @@ namespace manip {
         }
     }
 
-    bool fill_background(gd &img, gd::color bg) {
-        const int bg_r = (bg & 0xff0000) >> 16;
-        const int bg_g = (bg & 0x00ff00) >>  8;
-        const int bg_b = (bg & 0x0000ff);
-        img.convert_to_true_color();
-        img.alpha_blending(false);
-        const int width = img.width();
-        const int height = img.height();
-        for(int y = 0; y < height; ++y) {
-            for(int x = 0; x < width; ++x) {
-                const gd::color color = img.pixel_fast(x, y);
-                const int a = (color & 0x7f000000) >> 24;
-                if(a == 0) {
-                    continue;
-                }
-                const double alpha = static_cast<double>(127 - a) / 127.0;
-                const int org_r = (color & 0xff0000) >> 16;
-                const int org_g = (color & 0x00ff00) >>  8;
-                const int org_b = (color & 0x0000ff);
-                const int r = static_cast<int>(org_r * alpha + bg_r * (1.0 - alpha) + 0.5);
-                const int g = static_cast<int>(org_g * alpha + bg_g * (1.0 - alpha) + 0.5);
-                const int b = static_cast<int>(org_b * alpha + bg_b * (1.0 - alpha) + 0.5);
-                img.pixel_fast(x, y, (r << 16) | (g << 8) | b);
-            }
-        }
-        return true;
-    }
-
     bool grayscale(gd &img) {
-        img.convert_to_true_color();
-        img.alpha_blending(false);
-        const int width = img.width();
-        const int height = img.height();
-        for(int y = 0; y < height; ++y) {
-            for(int x = 0; x < width; ++x) {
-                const gd::color color = img.pixel_fast(x, y);
-                const int r = (color & 0xff0000) >> 16;
-                const int g = (color & 0x00ff00) >>  8;
-                const int b = (color & 0x0000ff);
-                const int a = (color & 0x7f000000); // そのまま使うのでビットシフトしない
-                const int gray = (77 * r + 150 * g + 29 * b + 128) / 256; // 0.298912 * r + 0.586611 * g + 0.114478 * b + 0.5
-                img.pixel_fast(x, y, a | (gray * 0x010101));
-            }
-        }
-        return true;
+        return do_grayscale(img, 0x00, 0xff, (0x7f << 24));
     }
 
     bool colorize(gd &img, int red, int green, int blue, int alpha) {
@@ -610,6 +626,42 @@ namespace manip {
         // 解像度を下げたので元（とほとんど同じ）サイズに変更する
         // GD の拡大が nearest neighbor なことに依存している
         img.resize_fit(img.width() * 2, img.height() * 2);
+        return true;
+    }
+
+    bool gameboy(gd &img, bool scale, DITHERING_METHOD dither) {
+        const int    palette_y_cb_cr[4] = { 0x3a8080, 0x6b8080, 0xb08080, 0xde8080 };
+        const size_t palette_size = 4;
+        int palette_use_count[4] = {};
+        
+        // 出力色が完全な白や黒でないので調整する
+        if(!do_grayscale(img, 28, 236, 0xffffff)) {
+            return false;
+        }
+
+        if(scale) {
+            img.resize_fit(160, 144);
+        }
+
+        // ファミコンパレットへの変換を流用して変換する
+        famicom_convert(img, dither, palette_y_cb_cr, palette_size, palette_use_count);
+
+        // パレット置換
+        const int width = img.width();
+        const int height = img.height();
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const gd::color color = img.pixel_fast(x, y);
+                const int c1 = (color & 0x0000ff);
+                const int c2 = (c1 < 0x52) ? 0x204631 : (c1 < 0x8d) ? 0x527f39 : (c1 < 0xc7) ? 0xaec440 : 0xd7e894;
+                img.pixel_fast(x, y, c2);
+            }
+        }
+
+        if(scale) {
+            img.resize_fit(480, 432);
+        }
+
         return true;
     }
 

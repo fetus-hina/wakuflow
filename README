@@ -89,6 +89,13 @@
         command: famicom
         option1: ディザリング方法(省略可:省略時none)
 
+    【ゲームボーイ】
+        command: gameboy
+        option1: 縮小設定
+                    scale:  BGの画面サイズにする(デフォルト)
+                    asis:   サイズを変更しない
+        option2: ディザリング方法(省略時:none)
+
     【ネガ】
         command: nagate
         option: なし
