@@ -92,7 +92,14 @@
     【ゲームボーイ】
         command: gameboy
         option1: 縮小設定
-                    scale:  BGの画面サイズにする(デフォルト)
+                    scale:  画面サイズにする(デフォルト)
+                    asis:   サイズを変更しない
+        option2: ディザリング方法(省略時:none)
+
+    【バーチャルボーイ】
+        command: virtualboy
+        option1: 縮小設定
+                    scale:  画面サイズにする(デフォルト)
                     asis:   サイズを変更しない
         option2: ディザリング方法(省略時:none)
 

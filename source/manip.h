@@ -21,7 +21,8 @@ namespace manip {
     bool binarize(gd &, bool is_grayscaled, THRESHOLDING, DITHERING_METHOD);
     bool websafe(gd &, DITHERING_METHOD m);
     bool famicom(gd &, DITHERING_METHOD m);
-    bool gameboy(gd &img, bool scale, DITHERING_METHOD dither);
+    bool gameboy(gd &, bool scale, DITHERING_METHOD dither);
+    bool virtualboy(gd &, bool scale, DITHERING_METHOD dither);
     bool negate(gd &);
     bool pixelate(gd &, int);
     bool emboss(gd &);

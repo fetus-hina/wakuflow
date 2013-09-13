@@ -139,6 +139,23 @@ void gd::resize_fit(int target_w, int target_h) {
     assert(height() == target_h);
 }
 
+void gd::resize_force(int target_w, int target_h) {
+    VALIDATE_IMAGE();
+    assert(target_w > 0);
+    assert(target_h > 0);
+    convert_to_true_color();
+
+    gd dst(target_w, target_h);
+    dst.alpha_blending(false);
+    dst.fill(0, 0, 0x7fffffff);
+    dst.alpha_blending(true);
+    dst.save_alpha(false);
+    dst.copy_resize(*this, 0, 0, 0, 0, target_w, target_h, width(), height());
+    swap(dst);
+    assert(width() == target_w);
+    assert(height() == target_h);
+}
+
 void gd::pixel(int x, int y, color c) {
     VALIDATE_IMAGE();
     ::gdImageSetPixel(m_image, x, y, c);

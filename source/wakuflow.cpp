@@ -145,6 +145,10 @@ namespace {
             const bool scale = (options.size() >= 1 && options[0] == "asis") ? false : true;
             const manip::DITHERING_METHOD method = (options.size() >= 2) ? dithering_method(options[1], manip::DITHERING_NONE) : manip::DITHERING_NONE;
             return manip::gameboy(image, scale, method);
+        } else if(command == "virtualboy") {
+            const bool scale = (options.size() >= 1 && options[0] == "asis") ? false : true;
+            const manip::DITHERING_METHOD method = (options.size() >= 2) ? dithering_method(options[1], manip::DITHERING_NONE) : manip::DITHERING_NONE;
+            return manip::virtualboy(image, scale, method);
         } else if(command == "negate") {
             return manip::negate(image);
         } else if(command == "pixelate") {

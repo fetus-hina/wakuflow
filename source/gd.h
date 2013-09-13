@@ -37,6 +37,7 @@ public:
     void fill(int x, int y, color c);
     void fill_rect(int x1, int y1, int x2, int y2, color c);
     void resize_fit(int w, int h);
+    void resize_force(int w, int h);
     void pixel(int x, int y, color c);
     color pixel(int x, int y) const;
     void pixel_fast(int x, int y, color c);

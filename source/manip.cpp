@@ -665,6 +665,43 @@ namespace manip {
         return true;
     }
 
+    bool virtualboy(gd &img, bool scale, DITHERING_METHOD dither) {
+        const int    palette_y_cb_cr[4] = { 0x008080, 0x558080, 0xaa8080, 0xff8080 };
+        const size_t palette_size = 4;
+        int palette_use_count[4] = {};
+        
+        if(!do_grayscale(img, 0, 255, 0xffffff)) {
+            return false;
+        }
+        if(scale) {
+            img.resize_fit(384, 288);   // 4:3 で切り出す
+            img.resize_force(384, 224); // ピクセル数を整合する
+        }
+        // ファミコンパレットへの変換を流用して変換する
+        famicom_convert(img, dither, palette_y_cb_cr, palette_size, palette_use_count);
+
+        // パレット置換
+        const int palette_red[4] = { 0x170515, 0x5c020a, 0xa20000, 0xe70000 };
+        const int width = img.width();
+        const int height = img.height();
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const gd::color color = img.pixel_fast(x, y);
+                const int c1 = (color & 0x0000ff);
+                const int c2 = palette_red[c1 / 85];
+                img.pixel_fast(x, y, c2);
+            }
+        }
+
+        if(scale) {
+            img.resize_force(384, 288); // 歪ませたので戻す
+        }
+
+        gaussian_blur(img);
+
+        return true;
+    }
+
     bool negate(gd &img) {
         img.convert_to_true_color();
         img.alpha_blending(false);
