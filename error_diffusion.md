@@ -24,3 +24,16 @@ wakuflowプログラムでは色数を減らす変換を行う際にどのよう
 | `sierra2`     | ![](docimg/error/bin_sierra2.png)     | ![](docimg/error/websafe_sierra2.png)     | ![](docimg/error/famicom_sierra2.png)     | ![](docimg/error/gameboy_sierra2.png)     |
 | `sierra-lite` | ![](docimg/error/bin_sierra-lite.png) | ![](docimg/error/websafe_sierra-lite.png) | ![](docimg/error/famicom_sierra-lite.png) | ![](docimg/error/gameboy_sierra-lite.png) |
 | `atkinson`    | ![](docimg/error/bin_atkinson.png)    | ![](docimg/error/websafe_atkinson.png)    | ![](docimg/error/famicom_atkinson.png)    | ![](docimg/error/gameboy_atkinson.png)    |
+
+誤差拡散による画像の滲み等
+--------------------------
+
+誤差拡散処理の仕組み上、適当な色がなかなか見つからない場合に下方向に滲む場合があります。
+
+| 元画像                            | 出力画像                          |
+|:---------------------------------:|:---------------------------------:|
+| ![](docimg/error/nijimi-orig.png) | ![](docimg/error/nijimi-proc.png) |
+
+同じ理由でいわゆる二次元イラストの場合に頬のピンク色の部分が変形して表情すら変わってしまう場合があります。
+
+これらの症状が出る場合は、誤差拡散メソッドを変更することで改善する場合があります（特に `atkinson` は誤差をあまり拡散しないので良い結果になるかもしれません）
