@@ -15,12 +15,12 @@ wakuflowプログラムでは色数を減らす変換を行う際にどのよう
 変換サンプル
 ------------
 
-| 指定          | サンプル                          |
-|---------------|:---------------------------------:|
-| (入力画像)    | ![](docimg/error/input.png)       |
-| `none`        | ![](docimg/error/none.png)        |
-| `floyd`       | ![](docimg/error/floyd.png)       |
-| `sierra3`     | ![](docimg/error/sierra3.png)     |
-| `sierra2`     | ![](docimg/error/sierra2.png)     |
-| `sierra-lite` | ![](docimg/error/sierra-lite.png) |
-| `atkinson`    | ![](docimg/error/atkinson.png)    |
+| 指定          | サンプル                              |                                           |                                           |                                           |                                       |
+|---------------|:-------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|:-----------------------------------------:|:-------------------------------------:|
+| (入力画像)    | ![](docimg/error/input.png)           | ![](docimg/error/input.png)               | ![](docimg/error/input.png)               | ![](docimg/error/input.png)               | ![](docimg/error/input.png)           |
+| `none`        | ![](docimg/error/bin_none.png)        | ![](docimg/error/websafe_none.png)        | ![](docimg/error/famicom_none.png)        | ![](docimg/error/gameboy_none.png)        | ![](docimg/error/bin_none.png)        |
+| `floyd`       | ![](docimg/error/bin_floyd.png)       | ![](docimg/error/websafe_floyd.png)       | ![](docimg/error/famicom_floyd.png)       | ![](docimg/error/gameboy_floyd.png)       | ![](docimg/error/bin_floyd.png)       |
+| `sierra3`     | ![](docimg/error/bin_sierra3.png)     | ![](docimg/error/websafe_sierra3.png)     | ![](docimg/error/famicom_sierra3.png)     | ![](docimg/error/gameboy_sierra3.png)     | ![](docimg/error/bin_sierra3.png)     |
+| `sierra2`     | ![](docimg/error/bin_sierra2.png)     | ![](docimg/error/websafe_sierra2.png)     | ![](docimg/error/famicom_sierra2.png)     | ![](docimg/error/gameboy_sierra2.png)     | ![](docimg/error/bin_sierra2.png)     |
+| `sierra-lite` | ![](docimg/error/bin_sierra-lite.png) | ![](docimg/error/websafe_sierra-lite.png) | ![](docimg/error/famicom_sierra-lite.png) | ![](docimg/error/gameboy_sierra-lite.png) | ![](docimg/error/bin_sierra-lite.png) |
+| `atkinson`    | ![](docimg/error/bin_atkinson.png)    | ![](docimg/error/websafe_atkinson.png)    | ![](docimg/error/famicom_atkinson.png)    | ![](docimg/error/gameboy_atkinson.png)    | ![](docimg/error/bin_atkinson.png)    |
