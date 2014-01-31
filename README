@@ -3,6 +3,7 @@
     $ wakuflow --input=/path/to/infile.{png,jpg,gif} --output=/path/to/outfile.png --font=/path/to/font.ttf
 
     ※waku_v2 を使用する場合は --font オプションが必須。ttf/otf ファイルなら大体 OK だけど、MyriadPro-BoldIt.otf を推奨
+    ※animal を使用する場合は --font2, --font3 オプションが必須。
 
 2. wakuflow は標準入力から「わーくフロー(参考: https://twitter.com/fetus_hina/status/240793399928700928 )」を受け付けるので次の書式で入力
 
@@ -138,6 +139,12 @@
     【反転】
         command: flip
         option1: vertical | horizontal
+
+    【動物はあなたのごはんじゃない。】
+        command: animal
+        option1: メインテキスト
+        option2: サブテキスト
+            ※font2, font3 の設定が必要
 
 《ディザリング方法》
     * none        : ディザリングなし

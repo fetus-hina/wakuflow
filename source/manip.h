@@ -32,5 +32,6 @@ namespace manip {
     bool rotate_fast(gd &, int degree);
     bool flip_horizontal(gd &);
     bool flip_vertical(gd &);
+    bool fill_background(gd &, int color);
 }
 #endif

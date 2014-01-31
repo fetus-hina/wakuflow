@@ -6,6 +6,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/foreach.hpp>
 #include <errno.h>
 #include "gd.h"
 #include "waku.h"
@@ -14,9 +16,12 @@
 #include "romanov.h"
 #include "stamp.h"
 #include "manip.h"
+#include "animal.h"
 
 //FIXME
 std::string config_waku_font_file;
+std::string config_animal_font_file1;
+std::string config_animal_font_file2;
 
 namespace po = ::boost::program_options;
 
@@ -27,6 +32,8 @@ namespace {
             ("input,i",  po::value<std::string>(), "Input file path")
             ("output,o", po::value<std::string>(), "Output file path")
             ("font,f", po::value<std::string>(),   "TTF/OTF font path for waku v2")
+            ("font2", po::value<std::string>(),    "TTF/OTF font path for animal")
+            ("font3", po::value<std::string>(),    "TTF/OTF font path for animal")
             ("help,h",                             "Help");
 
         try {
@@ -200,19 +207,26 @@ namespace {
                 std::cerr << "flip コマンドには vertical, horizontal の指定が必要です" << std::endl;
                 return false;
             }
+        } else if(command == "animal") {
+            if(options.size() < 2) {
+                std::cerr << "animal コマンドにはテキストの指定が2つ必要です" << std::endl;
+                return false;
+            }
+            return animal::animal(image, options[0], options[1]);
         }
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
     }
 
     bool parse_and_execute_command(gd &image, const std::string &line) {
-        // 真面目にトークン分割考えたほうがよさげ
-        std::vector<std::string> tokens;
-        boost::split(tokens, line, boost::is_space());
-        if(tokens.size() < 1) {
-            return true;
+        std::vector<std::string> params;
+
+        boost::escaped_list_separator<char> esc("\\", " ", "\"'");
+        boost::tokenizer< boost::escaped_list_separator<char> > tokens(line, esc);
+        BOOST_FOREACH(const auto &token, tokens) {
+            params.push_back(token);
         }
-        return execute_command(image, tokens[0], std::vector<std::string>(tokens.begin() + 1, tokens.end()));
+        return execute_command(image, params[0], std::vector<std::string>(params.begin() + 1, params.end()));
     }
 }
 
@@ -239,6 +253,16 @@ int main(int argc, char *argv[]) {
         config_waku_font_file = opt["font"].as<std::string>();
     } else {
         config_waku_font_file.clear();
+    }
+    if(opt.count("font2") == 1) {
+        config_animal_font_file1 = opt["font2"].as<std::string>();
+    } else {
+        config_animal_font_file1.clear();
+    }
+    if(opt.count("font3") == 1) {
+        config_animal_font_file2 = opt["font3"].as<std::string>();
+    } else {
+        config_animal_font_file2.clear();
     }
 
     gd current_image;

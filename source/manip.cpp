@@ -118,34 +118,6 @@ namespace manip {
             return true;
         }
 
-        bool fill_background(gd &img, gd::color bg) {
-            const int bg_r = (bg & 0xff0000) >> 16;
-            const int bg_g = (bg & 0x00ff00) >>  8;
-            const int bg_b = (bg & 0x0000ff);
-            img.convert_to_true_color();
-            img.alpha_blending(false);
-            const int width = img.width();
-            const int height = img.height();
-            for(int y = 0; y < height; ++y) {
-                for(int x = 0; x < width; ++x) {
-                    const gd::color color = img.pixel_fast(x, y);
-                    const int a = (color & 0x7f000000) >> 24;
-                    if(a == 0) {
-                        continue;
-                    }
-                    const double alpha = static_cast<double>(127 - a) / 127.0;
-                    const int org_r = (color & 0xff0000) >> 16;
-                    const int org_g = (color & 0x00ff00) >>  8;
-                    const int org_b = (color & 0x0000ff);
-                    const int r = static_cast<int>(org_r * alpha + bg_r * (1.0 - alpha) + 0.5);
-                    const int g = static_cast<int>(org_g * alpha + bg_g * (1.0 - alpha) + 0.5);
-                    const int b = static_cast<int>(org_b * alpha + bg_b * (1.0 - alpha) + 0.5);
-                    img.pixel_fast(x, y, (r << 16) | (g << 8) | b);
-                }
-            }
-            return true;
-        }
-
         bool do_grayscale(gd &img, int black = 0, int white = 255, gd::color background = 0x7fffffff) {
             img.convert_to_true_color();
             img.alpha_blending(false);
@@ -993,6 +965,34 @@ namespace manip {
             dst.copy(img, 0, y2, 0, y, width, 1);
         }
         img.swap(dst);
+        return true;
+    }
+
+    bool fill_background(gd &img, gd::color bg) {
+        const int bg_r = (bg & 0xff0000) >> 16;
+        const int bg_g = (bg & 0x00ff00) >>  8;
+        const int bg_b = (bg & 0x0000ff);
+        img.convert_to_true_color();
+        img.alpha_blending(false);
+        const int width = img.width();
+        const int height = img.height();
+        for(int y = 0; y < height; ++y) {
+            for(int x = 0; x < width; ++x) {
+                const gd::color color = img.pixel_fast(x, y);
+                const int a = (color & 0x7f000000) >> 24;
+                if(a == 0) {
+                    continue;
+                }
+                const double alpha = static_cast<double>(127 - a) / 127.0;
+                const int org_r = (color & 0xff0000) >> 16;
+                const int org_g = (color & 0x00ff00) >>  8;
+                const int org_b = (color & 0x0000ff);
+                const int r = static_cast<int>(org_r * alpha + bg_r * (1.0 - alpha) + 0.5);
+                const int g = static_cast<int>(org_g * alpha + bg_g * (1.0 - alpha) + 0.5);
+                const int b = static_cast<int>(org_b * alpha + bg_b * (1.0 - alpha) + 0.5);
+                img.pixel_fast(x, y, (r << 16) | (g << 8) | b);
+            }
+        }
         return true;
     }
 }
