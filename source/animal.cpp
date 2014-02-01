@@ -17,8 +17,8 @@ namespace animal {
         static const int INNER_WIDTH_LIMIT   = 600 - 40 * 2;
         static const int MAIN_TEXT_BASELINE  = 116;
         static const int MAIN_TEXT_FONT_SIZE =  30;
-        static const int SUB_TEXT_BASELINE   = 136;
-        static const int SUB_TEXT_FONT_SIZE  =  12;
+        static const int SUB_TEXT_BASELINE   = 140;
+        static const int SUB_TEXT_FONT_SIZE  =  10;
         static const int INNER_IMAGE_HEIGHT  = 110;
         static const int INNER_IMAGE_TOP     = 156;
         static const int COLOR_FG = 0xe97053;
