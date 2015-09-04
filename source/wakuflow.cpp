@@ -5,6 +5,7 @@
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/foreach.hpp>
@@ -17,6 +18,7 @@
 #include "stamp.h"
 #include "manip.h"
 #include "animal.h"
+#include "brain.h"
 
 //FIXME
 std::string config_waku_font_file;
@@ -32,7 +34,7 @@ namespace {
             ("input,i",  po::value<std::string>(), "Input file path")
             ("output,o", po::value<std::string>(), "Output file path")
             ("font,f", po::value<std::string>(),   "TTF/OTF font path for waku v2")
-            ("font2", po::value<std::string>(),    "TTF/OTF font path for animal")
+            ("font2", po::value<std::string>(),    "TTF/OTF font path for animal/brain")
             ("font3", po::value<std::string>(),    "TTF/OTF font path for animal")
             ("help,h",                             "Help");
 
@@ -213,7 +215,14 @@ namespace {
                 return false;
             }
             return animal::animal(image, options[0], options[1]);
+        } else if(command == "brain") {
+            if(options.size() < 1) {
+                std::cerr << "brain コマンドにはテキストの指定が1つ必要です" << std::endl;
+                return false;
+            }
+            return brain::brain(image, ::boost::algorithm::join(options, "\n"));
         }
+
         std::cerr << "不明なコマンド: " << command << std::endl;
         return false;
     }
